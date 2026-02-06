@@ -40,8 +40,6 @@ env/
 htmlcov/
 .tox/
 
-# Downloaded challenge files
-challenge.html
-script.js
-style.css
+# Challenge artifacts
 *.tmp
+*.log

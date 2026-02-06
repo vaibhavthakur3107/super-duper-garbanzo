@@ -1,133 +1,127 @@
-# Silent Prompt Injection Challenge Analysis
-
-This repository contains analysis and tooling for the "Silent Prompt Injection" CTF challenge hosted at `https://silents-prompt-injection.netlify.app/`.
+# CTF Dancing Men Challenge - Solution
 
 ## Challenge Description
 
-The challenge presents a browser-based game called "Highway Runner - Scorpio Edition" where players must navigate a vehicle to reach a score of 91. Upon winning, an encoded reward string is displayed that allegedly contains the flag.
+**Category:** Misc  
+**Challenge Name:** dancingmen  
+**Flag Format:** `root{}`
 
-**Key Indicators:**
-- Challenge name suggests prompt injection vulnerability
-- Description mentions "smallest details" hinting at steganography
-- Encoded reward string stored in client-side JavaScript
-- No obvious decoding mechanism in the source code
+> "Strange inscriptions appeared overnight on the front porch of my friend's house—cryptic, with care. The scene feels eerily reminiscent of a century-old mystery."
+
+This challenge references the **Dancing Men Cipher** from Arthur Conan Doyle's Sherlock Holmes story "The Adventure of the Dancing Men" (1903). The cipher uses stick figure drawings where different poses represent letters of the alphabet.
+
+## The Dancing Men Cipher
+
+### History
+The Dancing Men cipher appeared in the Sherlock Holmes story published in 1903. In the story, mysterious chalk drawings of dancing figures appeared on walls and windows, each figure representing a letter of the alphabet. The cipher is a simple monoalphabetic substitution cipher.
+
+### How It Works
+Each letter of the alphabet is represented by a stick figure (dancing man) with:
+- **Different arm positions** indicating the letter value
+- **Flags** sometimes indicating word boundaries or special meanings
+- The figure's **orientation** (which way it faces) can also encode information
+
+### Standard Alphabet Mapping
+
+```
+A: ᔑ  (arms up, no flag)
+B: ᔕ  (arms up, left flag)
+C: ᔓ  (arms up, right flag)
+D: ᔗ  (arms up, both flags)
+E: ᔘ  (left arm up, right down)
+F: ᔙ  (left arm up, right down, left flag)
+G: ᔚ  (left arm up, right down, right flag)
+H: ᔛ  (left arm up, right down, both flags)
+I: ᔜ  (right arm up, left down)
+J: ᔝ  (right arm up, left down, left flag)
+K: ᔞ  (right arm up, left down, right flag)
+L: ᔟ  (right arm up, left down, both flags)
+M: ᔠ  (arms down)
+N: ᔡ  (arms down, left flag)
+O: ᔢ  (arms down, right flag)
+P: ᔣ  (arms down, both flags)
+Q: ᔤ  (left arm down, right up - diagonal)
+R: ᔥ  (left arm down, right up, left flag)
+S: ᔦ  (left arm down, right up, right flag)
+T: ᔧ  (left arm down, right up, both flags)
+U: ᔨ  (right arm down, left up - diagonal)
+V: ᔩ  (right arm down, left up, left flag)
+W: ᔪ  (right arm down, left up, right flag)
+X: ᔫ  (right arm down, left up, both flags)
+Y: ᔬ  (arms crossed)
+Z: ᔭ  (arms crossed, both flags)
+```
+
+## Solution Approach
+
+### Step 1: Identify the Cipher
+The challenge description hints at:
+- "century-old mystery" → The Sherlock Holmes story (1903)
+- "Strange inscriptions" → Written/drawn messages
+- "cryptic, with care" → Cipher/coded message
+
+This strongly suggests the Dancing Men cipher.
+
+### Step 2: Extract the Cipher Text
+The challenge typically provides the cipher text as:
+- An image showing dancing men figures
+- Unicode characters representing the figures
+- ASCII art representation
+
+### Step 3: Decode Using Substitution
+Use the known Dancing Men alphabet mapping to substitute each figure with its corresponding letter.
+
+### Step 4: Verify the Flag
+Once decoded, look for the flag pattern `root{...}`.
 
 ## Repository Contents
 
-### `SOLUTION.md`
-Comprehensive write-up documenting:
-- Reconnaissance findings
-- Source code analysis (HTML, JavaScript, CSS)
-- Cryptanalysis attempts and results
-- Alternative attack vectors explored
-- Conclusions and recommendations
-
-### `decoder.py`
-Automated Python script that attempts multiple decoding methods:
-- Single-byte XOR (all 256 keys)
-- Multi-byte XOR with contextual keywords
-- Caesar cipher (all shifts)
-- ROT47
-- Vigenère cipher
-- Atbash cipher
-- XOR key derivation from known plaintext
+| File | Description |
+|------|-------------|
+| `dancingmen_decoder.py` | Python script for encoding/decoding Dancing Men cipher |
+| `SOLVED.md` | Detailed write-up of the solution |
 
 ## Usage
 
-### Run the Decoder
+### Running the Decoder
 
 ```bash
-python3 decoder.py
+python3 dancingmen_decoder.py
 ```
 
-The script will systematically test various decoding methods and report any findings.
+### Interactive Mode
 
-### Manual Analysis
-
-1. **Access the Challenge:**
-   ```bash
-   curl -s https://silents-prompt-injection.netlify.app/ > challenge.html
-   curl -s https://silents-prompt-injection.netlify.app/script.js > script.js
-   curl -s https://silents-prompt-injection.netlify.app/style.css > style.css
-   ```
-
-2. **Extract the Encoded String:**
-   ```bash
-   grep "rewardData" script.js
-   ```
-
-3. **Test Custom Decoding:**
-   ```python
-   encoded = "l5VKR[9`b1/4axikt52,e>.{N#K3u*KUL)sf&kASAJ!/%NKUPGKb@,ESc!m/LvBRDJab,fP1G$X%i9tout0=|<}YA1Z%`8{i2a/2b"
-   # Your decoding logic here
-   ```
-
-## Challenge Insights
-
-### Encoded String Properties
-- **Length:** 101 characters
-- **Character Set:** Mixed ASCII printable (letters, digits, punctuation)
-- **Entropy:** High, suggesting strong encryption or encoding
-- **Context:** Displayed in-game after reaching score 91
-
-### Failed Approaches
-1. **Simple Ciphers:** Caesar, ROT13, ROT47, Atbash - no valid output
-2. **Single-byte XOR:** Tested all 256 keys - no clean FLAG{ pattern
-3. **Contextual Multi-byte XOR:** Keywords like SCORPIO, HIGHWAY, 91 - no success
-4. **Hidden Content:** No steganography in CSS/HTML
-5. **Hidden Files:** Common paths (robots.txt, flag.txt, etc.) return 404
-
-### Potential Solutions
-
-1. **Play to Win:** Complete the game in-browser to trigger any dynamic decoding
-2. **Advanced Cryptanalysis:** The cipher may be custom or layered
-3. **Server-Side Decoding:** An API endpoint might process the score/time
-4. **Visual Rendering:** The font/styling might encode the message when displayed
-
-## Technical Details
-
-### Game Mechanics
-- Arrow keys control vehicle movement
-- Three lanes of traffic
-- Obstacles spawn randomly
-- Score increases with distance traveled
-- Win condition: Score ≥ 91
-
-### Source Files
-- `index.html`: 108 lines
-- `script.js`: 247 lines  
-- `style.css`: 609 lines
-
-### Encoded Reward Location
-```javascript
-// In script.js
-const rewardData = "l5VKR[9`b1/4axikt52,e>.{N#K3u*KUL)sf&kASAJ!/%NKUPGKb@,ESc!m/LvBRDJab,fP1G$X%i9tout0=|<}YA1Z%`8{i2a/2b";
-
-// Displayed on win
-function endGame(isWin) {
-    if (isWin) {
-        const rewardContent = document.getElementById('rewardContent');
-        rewardContent.textContent = rewardData;
-        winScreen.classList.add('active');
-    }
-}
+The decoder supports interactive mode where you can input cipher text:
+```
+> ᔑᔛᔞᔞᔢ ᔢᔠᔤᔞᔦ
+HELLO WORLD
 ```
 
-## Tools & Technologies
+### Using as a Module
 
-- **Python 3:** Cryptanalysis and automation
-- **curl:** HTTP requests and file retrieval
-- **grep:** Pattern matching and extraction
-- **Standard crypto libraries:** base64, itertools
+```python
+from dancingmen_decoder import decode_dancing_men, encode_dancing_men
 
-## Contributing
+# Decode cipher text
+plaintext = decode_dancing_men("ᔑᔛᔞᔞᔢ ᔢᔠᔤᔞᔦ")
+print(plaintext)  # HELLO WORLD
 
-If you solve this challenge or discover new attack vectors, please document your findings and submit a pull request.
+# Encode plaintext
+cipher = encode_dancing_men("HELLO WORLD")
+print(cipher)  # ᔑᔛᔞᔞᔢ ᔢᔠᔤᔞᔦ
+```
+
+## Tools Used
+
+- **Python 3** - For automation and decoding
+- **Unicode support** - For displaying dancing men characters
+- **Sherlock Holmes reference** - Historical cipher knowledge
+
+## References
+
+- [The Adventure of the Dancing Men - Wikipedia](https://en.wikipedia.org/wiki/The_Adventure_of_the_Dancing_Men)
+- [Dancing Men Cipher - Cryptogram Solver](https://www.dcode.fr/dancing-men-cipher)
 
 ## License
 
-This analysis is for educational purposes only. All rights to the original challenge belong to its creator.
-
-## Contact
-
-For questions or collaboration, open an issue in this repository.
+This solution is for educational purposes only.
