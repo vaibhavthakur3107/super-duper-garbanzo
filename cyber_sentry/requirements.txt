@@ -1,0 +1,32 @@
+# Cyber-Sentry AI - Requirements
+# Full Stack for LangGraph + Ollama + Streamlit
+
+# Core LangGraph & LangChain
+langgraph>=0.0.20
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-community>=0.0.10
+langchain-ollama>=0.0.1
+
+# Local LLM - Ollama
+ollama>=0.1.0
+
+# Frontend - Streamlit
+streamlit>=1.28.0
+
+# Database
+sqlalchemy>=2.0.0
+aiosqlite>=0.19.0
+
+# Web & API
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.5.0
+httpx>=0.25.0
+python-dotenv>=1.0.0
+
+# Utilities
+python-dateutil>=2.8.0
+
+# For async operations
+anyio>=4.0.0

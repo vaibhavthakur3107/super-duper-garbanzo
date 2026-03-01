@@ -45,3 +45,10 @@ challenge.html
 script.js
 style.css
 *.tmp
+
+# Cyber-Sentry
+cyber_sentry/ui/node_modules/
+cyber_sentry/ui/dist/
+cyber_sentry/ui/.vite/
+*.log
+*.db
