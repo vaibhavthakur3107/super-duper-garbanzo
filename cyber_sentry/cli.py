@@ -17,6 +17,7 @@ import asyncio
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 # Allow running as  python -m cyber_sentry.cli  from repo root
@@ -26,32 +27,222 @@ sys.path.insert(0, str(_REPO_ROOT))
 from cyber_sentry.providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
 from cyber_sentry.notes import NotesManager
 
-BANNER = r"""
-   _____      _               ____             _              
-  / ____|    | |             / ___|  ___  _ __ | |_ _ __ _   _ 
- | |    _   _| |__   ___ _ _\___ \ / _ \| '_ \| __| '__| | | |
- | |___| |_| | '_ \ / _ \ '__|__) |  __/| | | | |_| |  | |_| |
-  \_____\__, |_.__/ \___/_| |____/ \___||_| |_|\__|_|   \__, |
-         __/ |                                            __/ |
-        |___/   AI-Powered Red Team Pentesting Agent     |___/ 
-"""
 
-HELP_TEXT = """
-Commands:
-  /agent <task>        Run autonomous agent on task
-  /target <host>       Set target
-  /playbook <name>     Load and run a playbook
-  /notes               Show saved notes / loot
-  /report              Generate Markdown report for current session
-  /playbooks           List available playbooks
-  /tools               List available tools
-  /mcp list            List configured MCP servers
-  /mcp add <n> <cmd>   Add MCP server (name + command)
-  /mcp test <name>     Test MCP server availability
-  /clear               Clear current session
-  /quit                Exit  (also /exit, /q)
-  /help                Show this help  (also /h, /?)
-"""
+# ── ANSI Color Utilities ─────────────────────────────────────────────────────
+
+class Colors:
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    RED = "\033[91m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    MAGENTA = "\033[95m"
+    CYAN = "\033[96m"
+    WHITE = "\033[97m"
+    BG_RED = "\033[41m"
+    BG_GREEN = "\033[42m"
+    BG_BLUE = "\033[44m"
+
+
+def colored(text, color):
+    return f"{color}{text}{Colors.RESET}"
+
+
+def success(text):
+    return colored(f"[✓] {text}", Colors.GREEN)
+
+
+def error(text):
+    return colored(f"[✗] {text}", Colors.RED)
+
+
+def warning(text):
+    return colored(f"[!] {text}", Colors.YELLOW)
+
+
+def info(text):
+    return colored(f"[*] {text}", Colors.CYAN)
+
+
+def header(text):
+    return colored(f"═══ {text} ═══", Colors.MAGENTA + Colors.BOLD)
+
+
+# ── Banner & Help ────────────────────────────────────────────────────────────
+
+BANNER = (
+    f"\n"
+    f"{Colors.CYAN}{Colors.BOLD}"
+    f"   ██████╗██╗   ██╗██████╗ ███████╗██████╗ \n"
+    f"  ██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗\n"
+    f"  ██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝\n"
+    f"  ██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗\n"
+    f"  ╚██████╗   ██║   ██████╔╝███████╗██║  ██║\n"
+    f"   ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝{Colors.RESET}\n"
+    f"{Colors.RED}{Colors.BOLD}"
+    f"  ███████╗███████╗███╗   ██╗████████╗██████╗ ██╗   ██╗\n"
+    f"  ██╔════╝██╔════╝████╗  ██║╚══██╔══╝██╔══██╗╚██╗ ██╔╝\n"
+    f"  ███████╗█████╗  ██╔██╗ ██║   ██║   ██████╔╝ ╚████╔╝ \n"
+    f"  ╚════██║██╔══╝  ██║╚██╗██║   ██║   ██╔══██╗  ╚██╔╝  \n"
+    f"  ███████║███████╗██║ ╚████║   ██║   ██║  ██║   ██║   \n"
+    f"  ╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   {Colors.RESET}\n"
+    f"\n"
+    f"  {Colors.DIM}{'─' * 56}{Colors.RESET}\n"
+    f"  {Colors.GREEN}▸ AI-Powered Red Team Pentesting Agent{Colors.RESET}\n"
+    f"  {Colors.YELLOW}▸ v2.0{Colors.RESET}  "
+    f"{Colors.CYAN}Tools: 151+{Colors.RESET}  "
+    f"{Colors.MAGENTA}Agents: 12+{Colors.RESET}  "
+    f"{Colors.GREEN}Status: READY{Colors.RESET}\n"
+    f"  {Colors.DIM}{'─' * 56}{Colors.RESET}\n"
+)
+
+# Agent definitions for /agents command
+_AGENTS = [
+    ("IntelligentDecisionEngine", "Selects optimal tools & parameters for any task"),
+    ("BugBountyWorkflowManager", "Manages end-to-end bug bounty hunting workflows"),
+    ("CTFWorkflowManager", "Solves CTF challenges with adaptive strategies"),
+    ("CVEIntelligenceManager", "CVE lookup, analysis, and exploit correlation"),
+    ("AIExploitGenerator", "Generates and validates exploit payloads"),
+    ("VulnerabilityCorrelator", "Correlates findings across tools and scans"),
+    ("TechnologyDetector", "Fingerprints tech stacks and frameworks"),
+    ("RateLimitDetector", "Detects and adapts to rate limiting defenses"),
+    ("FailureRecoverySystem", "Auto-recovers from tool and agent failures"),
+    ("PerformanceMonitor", "Tracks agent performance and resource usage"),
+    ("ParameterOptimizer", "Tunes tool parameters based on results"),
+    ("GracefulDegradation", "Maintains operations when components fail"),
+]
+
+HELP_TEXT = (
+    f"\n"
+    f"  {header('COMMANDS')}\n"
+    f"\n"
+    f"  {colored('Agent & Execution', Colors.CYAN + Colors.BOLD)}\n"
+    f"    {colored('/agent <task>', Colors.GREEN)}        Run autonomous agent on task\n"
+    f"    {colored('/playbook <name>', Colors.GREEN)}     Load and run a playbook\n"
+    f"    {colored('/target <host>', Colors.GREEN)}       Set target\n"
+    f"\n"
+    f"  {colored('Reporting & Intel', Colors.CYAN + Colors.BOLD)}\n"
+    f"    {colored('/notes', Colors.GREEN)}               Show saved notes / loot\n"
+    f"    {colored('/report', Colors.GREEN)}              Generate Markdown report\n"
+    f"\n"
+    f"  {colored('Discovery', Colors.CYAN + Colors.BOLD)}\n"
+    f"    {colored('/playbooks', Colors.GREEN)}           List available playbooks\n"
+    f"    {colored('/tools', Colors.GREEN)}               List available tools (151+)\n"
+    f"    {colored('/agents', Colors.GREEN)}              List AI agents (12+)\n"
+    f"\n"
+    f"  {colored('System', Colors.CYAN + Colors.BOLD)}\n"
+    f"    {colored('/status', Colors.GREEN)}              Show system status dashboard\n"
+    f"    {colored('/dashboard', Colors.GREEN)}           Detailed status dashboard\n"
+    f"    {colored('/mcp list', Colors.GREEN)}            List configured MCP servers\n"
+    f"    {colored('/mcp add <n> <cmd>', Colors.GREEN)}   Add MCP server\n"
+    f"    {colored('/mcp test <name>', Colors.GREEN)}     Test MCP server availability\n"
+    f"    {colored('/clear', Colors.GREEN)}               Clear current session\n"
+    f"\n"
+    f"  {colored('Navigation', Colors.CYAN + Colors.BOLD)}\n"
+    f"    {colored('/help', Colors.GREEN)}                Show this help  (/h, /?)\n"
+    f"    {colored('/quit', Colors.GREEN)}                Exit  (/exit, /q)\n"
+)
+
+
+def _status_dashboard(target: str, notes: NotesManager, provider: str) -> str:
+    """Render a status dashboard box."""
+    note_count = len(notes.get_notes())
+    t_display = target if target else "not set"
+    status = colored("ACTIVE", Colors.GREEN + Colors.BOLD) if target else colored("READY", Colors.YELLOW)
+
+    # Try to get cache stats
+    try:
+        from cyber_sentry.cache import SmartCache
+        cache = SmartCache()
+        hits = cache.stats.get("hits", 0)
+        misses = cache.stats.get("misses", 0)
+    except Exception:
+        hits, misses = 0, 0
+
+    w = 56
+    border = Colors.CYAN
+    lines = [
+        f"  {border}╔{'═' * w}╗{Colors.RESET}",
+        f"  {border}║{Colors.RESET}  {Colors.BOLD}{Colors.CYAN}CYBER-SENTRY AI v2.0 — STATUS DASHBOARD{Colors.RESET}{' ' * (w - 41)}{border}║{Colors.RESET}",
+        f"  {border}╠{'═' * w}╣{Colors.RESET}",
+        f"  {border}║{Colors.RESET}  🎯 Target: {t_display:<20s}  Status: {status}{' ' * max(0, w - 43 - len(t_display))}{border}║{Colors.RESET}",
+        f"  {border}║{Colors.RESET}  🔧 Tools:  151+{' ' * 17}Agents: 12+{' ' * (w - 48)}{border}║{Colors.RESET}",
+        f"  {border}║{Colors.RESET}  📋 Notes:  {note_count:<20d} Sessions: 0{' ' * (w - 48)}{border}║{Colors.RESET}",
+        f"  {border}║{Colors.RESET}  💾 Cache:  {hits} hits / {misses} misses{' ' * max(0, w - 37 - len(str(hits)) - len(str(misses)))}Provider: {provider:<8s}{border}║{Colors.RESET}",
+        f"  {border}╚{'═' * w}╝{Colors.RESET}",
+    ]
+    return "\n".join(lines)
+
+
+def _format_tools_table() -> str:
+    """Render tools grouped by category in a table."""
+    from cyber_sentry.tools.network_tools import tool_registry
+    tools = tool_registry.list_tools()
+    categories: dict[str, list] = {}
+    for t in tools:
+        categories.setdefault(t["category"], []).append(t)
+
+    lines = []
+    for cat in sorted(categories):
+        cat_tools = categories[cat]
+        lines.append(f"\n  {colored(f'┌── {cat.upper()} ({len(cat_tools)} tools)', Colors.MAGENTA + Colors.BOLD)}")
+        lines.append(f"  {Colors.DIM}│{'─' * 54}{Colors.RESET}")
+        for t in cat_tools:
+            name_col = colored(f"{t['name']:<22s}", Colors.GREEN)
+            lines.append(f"  {Colors.DIM}│{Colors.RESET} {name_col} {Colors.DIM}{t['description'][:45]}{Colors.RESET}")
+        lines.append(f"  {Colors.DIM}└{'─' * 54}{Colors.RESET}")
+
+    total = len(tools)
+    lines.insert(0, f"\n  {colored(f'TOOL ARSENAL — {total} tools across {len(categories)} categories', Colors.CYAN + Colors.BOLD)}")
+    return "\n".join(lines)
+
+
+def _format_playbooks() -> str:
+    """Render playbooks in a formatted display."""
+    names = list_playbooks()
+    if not names:
+        return info("No playbooks found.")
+    lines = [f"\n  {colored('PLAYBOOKS', Colors.CYAN + Colors.BOLD)}", ""]
+    for n in names:
+        pb = load_playbook(n)
+        desc = pb.get("description", "").split("\n")[0].strip() if pb else ""
+        cat = pb.get("category", "general") if pb else "general"
+        lines.append(
+            f"  {colored('▸', Colors.GREEN)} {colored(f'{n:<20s}', Colors.YELLOW)}"
+            f" {Colors.DIM}[{cat}]{Colors.RESET}  {desc}"
+        )
+    return "\n".join(lines)
+
+
+def _format_agents() -> str:
+    """Render the agent list."""
+    lines = [f"\n  {colored(f'AI AGENTS — {len(_AGENTS)} specialized agents', Colors.CYAN + Colors.BOLD)}", ""]
+    for i, (name, desc) in enumerate(_AGENTS, 1):
+        lines.append(
+            f"  {colored(f'{i:>2}.', Colors.MAGENTA)} {colored(name, Colors.GREEN + Colors.BOLD)}\n"
+            f"      {Colors.DIM}{desc}{Colors.RESET}"
+        )
+    return "\n".join(lines)
+
+
+def _format_notes(notes_list: list[dict]) -> str:
+    """Render notes with category-based coloring."""
+    if not notes_list:
+        return info("No notes saved yet.")
+    cat_colors = {
+        "vulnerability": Colors.RED,
+        "credential": Colors.YELLOW,
+        "finding": Colors.GREEN,
+        "artifact": Colors.BLUE,
+    }
+    lines = []
+    for n in notes_list:
+        cat = n.get("category", "finding")
+        c = cat_colors.get(cat, Colors.WHITE)
+        lines.append(f"  {colored(f'[{cat.upper()}]', c + Colors.BOLD)} {n['content'][:120]}")
+    return "\n".join(lines)
 
 
 def list_playbooks() -> list[str]:
@@ -134,9 +325,10 @@ async def run_agent(target: str, task: str, model: str, provider: str, notes: No
     """Run the LangGraph pentesting agent and save findings."""
     # Lazy import – avoids pulling in langgraph at CLI startup
     from cyber_sentry.main import run_pentest  # noqa: C0415
-    print(f"\n[*] Starting agent on target: {target}")
-    print(f"[*] Task: {task}")
-    print(f"[*] Provider: {provider} / Model: {model}\n")
+    t0 = time.time()
+    print(f"\n{info(f'Starting agent on target: {target}')}")
+    print(f"{info(f'Task: {task}')}")
+    print(f"{info(f'Provider: {provider} / Model: {model}')}\n")
 
     result = await run_pentest(target, task, model, provider)
 
@@ -152,9 +344,10 @@ async def run_agent(target: str, task: str, model: str, provider: str, notes: No
 
     # Print thought trace summary
     thoughts = result.get("thought_trace", [])
-    print(f"\n[+] Assessment complete. {len(thoughts)} reasoning steps recorded.")
+    elapsed = time.time() - t0
+    print(f"\n{success(f'Assessment complete. {len(thoughts)} reasoning steps recorded in {elapsed:.1f}s.')}")
     if result.get("error"):
-        print(f"[!] Error: {result['error']}")
+        print(error(f"Error: {result['error']}"))
 
     return result
 
@@ -162,7 +355,7 @@ async def run_agent(target: str, task: str, model: str, provider: str, notes: No
 def interactive_mode(args: argparse.Namespace):
     """REPL-style interactive session (like PentestAgent TUI)."""
     print(BANNER)
-    print("Type /help for commands, /quit to exit.\n")
+    print(f"  {Colors.DIM}Type /help for commands, /quit to exit.{Colors.RESET}\n")
 
     target = args.target or ""
     model = args.model
@@ -171,13 +364,17 @@ def interactive_mode(args: argparse.Namespace):
     session_results: list[dict] = []
 
     if target:
-        print(f"[*] Target set: {target}")
+        print(success(f"Target set: {target}"))
 
     while True:
         try:
-            prompt = input("cyber-sentry> ").strip()
+            if target:
+                prompt_str = f"{Colors.RED}⚡{Colors.RESET}{Colors.CYAN}{Colors.BOLD}cyber-sentry{Colors.RESET}{Colors.DIM}[{Colors.RESET}{Colors.YELLOW}{target}{Colors.RESET}{Colors.DIM}]{Colors.RESET}{Colors.CYAN}>{Colors.RESET} "
+            else:
+                prompt_str = f"{Colors.RED}⚡{Colors.RESET}{Colors.CYAN}{Colors.BOLD}cyber-sentry{Colors.RESET}{Colors.CYAN}>{Colors.RESET} "
+            prompt = input(prompt_str).strip()
         except (KeyboardInterrupt, EOFError):
-            print("\nExiting. Goodbye!")
+            print(f"\n{info('Exiting. Goodbye!')}")
             break
 
         if not prompt:
@@ -185,7 +382,7 @@ def interactive_mode(args: argparse.Namespace):
 
         # ── Built-in commands ────────────────────────────────────────────────
         if prompt in ("/quit", "/exit", "/q"):
-            print("Goodbye!")
+            print(success("Goodbye!"))
             break
 
         if prompt in ("/help", "/h", "/?"):
@@ -194,48 +391,42 @@ def interactive_mode(args: argparse.Namespace):
 
         if prompt.startswith("/target "):
             target = prompt[8:].strip()
-            print(f"[*] Target set: {target}")
+            print(success(f"Target set: {target}"))
             continue
 
         if prompt == "/notes":
             all_notes = notes.get_notes()
-            if not all_notes:
-                print("[*] No notes saved yet.")
-            else:
-                for n in all_notes:
-                    print(f"  [{n['category']}] {n['content'][:120]}")
+            print(_format_notes(all_notes))
             continue
 
         if prompt == "/report":
             if not session_results:
-                print("[!] No session results to report yet.")
+                print(warning("No session results to report yet."))
                 continue
             path = notes.generate_report(session_results, target)
-            print(f"[+] Report saved to: {path}")
+            print(success(f"Report saved to: {path}"))
             continue
 
         if prompt == "/playbooks":
-            names = list_playbooks()
-            if not names:
-                print("[*] No playbooks found.")
-            else:
-                print("Available playbooks:")
-                for n in names:
-                    pb = load_playbook(n)
-                    desc = pb.get("description", "").split("\n")[0].strip() if pb else ""
-                    print(f"  {n:<20s}  {desc}")
+            print(_format_playbooks())
             continue
 
         if prompt == "/tools":
-            from cyber_sentry.tools.network_tools import tool_registry
-            for t in tool_registry.list_tools():
-                print(f"  {t['name']:<20s}  [{t['category']}]  {t['description']}")
+            print(_format_tools_table())
+            continue
+
+        if prompt == "/agents":
+            print(_format_agents())
+            continue
+
+        if prompt in ("/status", "/dashboard"):
+            print(f"\n{_status_dashboard(target, notes, provider)}")
             continue
 
         if prompt == "/clear":
             session_results.clear()
             notes.clear_session()
-            print("[*] Session cleared.")
+            print(info("Session cleared."))
             continue
 
         # ── MCP commands ─────────────────────────────────────────────────────
@@ -247,7 +438,7 @@ def interactive_mode(args: argparse.Namespace):
             pb_name = prompt[10:].strip()
             pb = load_playbook(pb_name)
             if not pb:
-                print(f"[!] Playbook '{pb_name}' not found. Use /playbooks to list available.")
+                print(error(f"Playbook '{pb_name}' not found. Use /playbooks to list available."))
                 continue
             task = pb.get("description", f"Run {pb_name} playbook").strip()
             if not target:
@@ -269,7 +460,7 @@ def interactive_mode(args: argparse.Namespace):
             result = asyncio.run(run_agent(target, prompt, model, provider, notes))
             session_results.append(result)
         else:
-            print("[!] No target set. Use /target <host> first, or /agent <task>.")
+            print(warning("No target set. Use /target <host> first, or /agent <task>."))
 
 
 def run_mode(args: argparse.Namespace):
