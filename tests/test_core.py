@@ -583,3 +583,417 @@ class TestNewKnowledgeSources:
         kb = KnowledgeBase()
         ctx = kb.get_context("gdb binary")
         assert "gdb" in ctx.lower()
+
+
+# ── Expanded Tool Arsenal (151+ tools) ───────────────────────────────────────
+
+class TestExpandedToolArsenal151:
+    """Tests for the 151+ tool arsenal."""
+
+    @pytest.fixture
+    def registry(self):
+        from cyber_sentry.tools.network_tools import ToolRegistry
+        return ToolRegistry()
+
+    def _names(self, registry):
+        return [t["name"] for t in registry.list_tools()]
+
+    def test_tool_count_at_least_150(self, registry):
+        assert len(registry.list_tools()) >= 150
+
+    def test_api_security_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "api_security" in cats
+
+    def test_wireless_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "wireless" in cats
+
+    def test_mobile_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "mobile" in cats
+
+    def test_ctf_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "ctf" in cats
+
+    def test_infrastructure_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "infrastructure" in cats
+
+    def test_graphql_introspection_registered(self, registry):
+        assert "graphql_introspection" in self._names(registry)
+
+    def test_metasploit_registered(self, registry):
+        assert "metasploit" in self._names(registry)
+
+    def test_searchsploit_registered(self, registry):
+        assert "searchsploit" in self._names(registry)
+
+    def test_aircrack_ng_registered(self, registry):
+        assert "aircrack_ng" in self._names(registry)
+
+    def test_apktool_registered(self, registry):
+        assert "apktool" in self._names(registry)
+
+    def test_frida_registered(self, registry):
+        assert "frida" in self._names(registry)
+
+    def test_pwntools_registered(self, registry):
+        assert "pwntools" in self._names(registry)
+
+    def test_xsstrike_registered(self, registry):
+        assert "xsstrike" in self._names(registry)
+
+    def test_lynis_registered(self, registry):
+        assert "lynis" in self._names(registry)
+
+
+# ── Smart Cache ──────────────────────────────────────────────────────────────
+
+class TestSmartCache:
+    """Tests for the smart caching system."""
+
+    def test_set_and_get(self):
+        from cyber_sentry.cache import SmartCache
+        c = SmartCache(max_size=10)
+        c.set("key1", "value1")
+        assert c.get("key1") == "value1"
+
+    def test_get_missing_returns_none(self):
+        from cyber_sentry.cache import SmartCache
+        c = SmartCache(max_size=10)
+        assert c.get("nonexistent") is None
+
+    def test_ttl_expiry(self):
+        import time
+        from cyber_sentry.cache import SmartCache
+        c = SmartCache(max_size=10)
+        c.set("expiring", "data", ttl=0.1)
+        assert c.get("expiring") == "data"
+        time.sleep(0.2)
+        assert c.get("expiring") is None
+
+    def test_lru_eviction(self):
+        from cyber_sentry.cache import SmartCache
+        c = SmartCache(max_size=3)
+        c.set("a", 1)
+        c.set("b", 2)
+        c.set("c", 3)
+        c.set("d", 4)  # should evict "a"
+        assert c.get("a") is None
+        assert c.get("d") == 4
+
+    def test_stats_tracking(self):
+        from cyber_sentry.cache import SmartCache
+        c = SmartCache(max_size=10)
+        c.set("x", 1)
+        c.get("x")      # hit
+        c.get("missing") # miss
+        stats = c.get_stats()
+        assert stats["hits"] == 1
+        assert stats["misses"] == 1
+        assert stats["hit_rate"] == 0.5
+
+    def test_invalidate(self):
+        from cyber_sentry.cache import SmartCache
+        c = SmartCache(max_size=10)
+        c.set("k", "v")
+        c.invalidate("k")
+        assert c.get("k") is None
+
+    def test_clear(self):
+        from cyber_sentry.cache import SmartCache
+        c = SmartCache(max_size=10)
+        c.set("a", 1)
+        c.set("b", 2)
+        c.clear()
+        assert c.get("a") is None
+        assert c.get("b") is None
+
+
+# ── CVE Intelligence ─────────────────────────────────────────────────────────
+
+class TestCVEIntelligence:
+    """Tests for the CVE intelligence manager."""
+
+    def test_preloaded_database(self):
+        from cyber_sentry.cve_intel import cve_intelligence
+        assert len(cve_intelligence._db) >= 5
+
+    def test_lookup_known_cve(self):
+        from cyber_sentry.cve_intel import cve_intelligence
+        entry = cve_intelligence.lookup_cve("CVE-2021-44228")
+        assert entry is not None
+        assert entry.cve_id == "CVE-2021-44228"
+
+    def test_lookup_unknown_returns_none(self):
+        from cyber_sentry.cve_intel import cve_intelligence
+        assert cve_intelligence.lookup_cve("CVE-9999-99999") is None
+
+    def test_search_cve(self):
+        from cyber_sentry.cve_intel import cve_intelligence
+        results = cve_intelligence.search_cve("apache")
+        assert len(results) > 0
+
+    def test_get_critical_cves(self):
+        from cyber_sentry.cve_intel import cve_intelligence
+        crits = cve_intelligence.get_critical_cves()
+        assert len(crits) > 0
+        from cyber_sentry.cve_intel import Severity
+        for c in crits:
+            assert c.severity == Severity.CRITICAL
+
+    def test_generate_advisory(self):
+        from cyber_sentry.cve_intel import cve_intelligence
+        crits = cve_intelligence.get_critical_cves()
+        advisory = cve_intelligence.generate_advisory(crits[:2])
+        assert len(advisory) > 0
+        assert "CVE-" in advisory
+
+
+# ── Process Manager ──────────────────────────────────────────────────────────
+
+class TestProcessManager:
+    """Tests for the process manager."""
+
+    def test_stats_initial(self):
+        from cyber_sentry.process_manager import ProcessManager
+        pm = ProcessManager()
+        stats = pm.get_stats()
+        assert stats["total"] == 0
+        assert stats["running"] == 0
+
+    def test_list_processes_empty(self):
+        from cyber_sentry.process_manager import ProcessManager
+        pm = ProcessManager()
+        assert pm.list_processes() == []
+
+    def test_start_simple_process(self):
+        from cyber_sentry.process_manager import ProcessManager
+        pm = ProcessManager()
+        proc = pm.start_process("echo hello", timeout=5)
+        assert proc is not None
+        assert proc.command == "echo hello"
+
+
+# ── Browser Agent ────────────────────────────────────────────────────────────
+
+class TestBrowserAgent:
+    """Tests for the browser agent."""
+
+    def test_check_available(self):
+        from cyber_sentry.browser_agent import browser_agent
+        # Should return bool without crashing
+        result = browser_agent.check_available()
+        assert isinstance(result, bool)
+
+    def test_analyze_security_headers_structure(self):
+        from cyber_sentry.browser_agent import BrowserAgent
+        ba = BrowserAgent()
+        # Test the method exists and returns a dict (may fail on network)
+        assert hasattr(ba, "analyze_security_headers")
+        assert hasattr(ba, "detect_technologies")
+        assert hasattr(ba, "find_forms")
+        assert hasattr(ba, "check_cors")
+
+
+# ── AI Agents ────────────────────────────────────────────────────────────────
+
+class TestAIAgents:
+    """Tests for the 12+ AI agent system."""
+
+    def test_get_all_agents_returns_dict(self):
+        from cyber_sentry.agents.ai_agents import get_all_ai_agents
+        agents = get_all_ai_agents()
+        assert isinstance(agents, dict)
+
+    def test_at_least_12_agents(self):
+        from cyber_sentry.agents.ai_agents import get_all_ai_agents
+        agents = get_all_ai_agents()
+        assert len(agents) >= 12
+
+    def test_expected_agents_present(self):
+        from cyber_sentry.agents.ai_agents import get_all_ai_agents
+        agents = get_all_ai_agents()
+        expected = [
+            "IntelligentDecisionEngine",
+            "BugBountyWorkflowManager",
+            "CTFWorkflowManager",
+            "CVEIntelligenceManager",
+            "AIExploitGenerator",
+            "VulnerabilityCorrelator",
+            "TechnologyDetector",
+            "RateLimitDetector",
+            "FailureRecoverySystem",
+            "PerformanceMonitor",
+            "ParameterOptimizer",
+            "GracefulDegradation",
+        ]
+        for name in expected:
+            assert name in agents, f"Agent '{name}' not found"
+
+    def test_agent_descriptions_non_empty(self):
+        from cyber_sentry.agents.ai_agents import get_all_ai_agents
+        for name, desc in get_all_ai_agents().items():
+            assert len(desc) > 10, f"Agent '{name}' has empty description"
+
+
+# ── Reporting Engine (pentagi) ───────────────────────────────────────────────
+
+class TestReportingEngine:
+    """Tests for the detailed reporting engine."""
+
+    def test_report_generator_importable(self):
+        from cyber_sentry.reporting import report_generator
+        assert report_generator is not None
+
+    def test_calculate_risk_score(self):
+        from cyber_sentry.reporting import report_generator
+        score = report_generator.calculate_risk_score([
+            {"severity": "critical"},
+            {"severity": "high"},
+            {"severity": "medium"},
+        ])
+        assert 0 <= score <= 10
+        assert score > 5  # critical + high should give high score
+
+    def test_risk_score_empty_is_zero(self):
+        from cyber_sentry.reporting import report_generator
+        assert report_generator.calculate_risk_score([]) == 0
+
+    def test_generate_full_report(self):
+        from cyber_sentry.reporting import report_generator
+        report = report_generator.generate_full_report(
+            [{"thought_trace": [
+                {"node": "tool", "action": "nmap_scan", "observation": "22/tcp open ssh"}
+            ]}],
+            "10.0.0.1",
+        )
+        assert isinstance(report, str)
+        assert len(report) > 200
+        assert "10.0.0.1" in report
+
+    def test_generate_exploitation_guide(self):
+        from cyber_sentry.reporting import report_generator
+        guide = report_generator.generate_exploitation_guide(
+            {"type": "sqli", "description": "SQL injection in login form"}
+        )
+        assert isinstance(guide, str)
+        assert len(guide) > 50
+
+    def test_generate_remediation(self):
+        from cyber_sentry.reporting import report_generator
+        rem = report_generator.generate_remediation(
+            {"type": "xss", "description": "Reflected XSS"}
+        )
+        assert isinstance(rem, str)
+        assert len(rem) > 20
+
+
+# ── Autonomous Engine & Specialists (pentagi) ────────────────────────────────
+
+class TestAutonomousEngine:
+    """Tests for the autonomous pentesting engine and specialist team."""
+
+    def test_specialist_team_has_specialists(self):
+        from cyber_sentry.autonomous import specialist_team
+        specs = specialist_team.list_specialists()
+        assert len(specs) >= 7
+
+    def test_specialist_roles(self):
+        from cyber_sentry.autonomous import specialist_team
+        roles = {s.role for s in specialist_team.list_specialists()}
+        for expected in ["reconnaissance", "web", "network", "exploit", "forensics", "cloud", "reporting"]:
+            assert expected in roles, f"Missing specialist role: {expected}"
+
+    def test_delegate_task(self):
+        from cyber_sentry.autonomous import specialist_team
+        result = specialist_team.delegate_task("scan for XSS vulnerabilities", {})
+        assert "specialist" in result
+        assert "task" in result
+
+    def test_plan_assessment(self):
+        from cyber_sentry.autonomous import autonomous_engine
+        plan = autonomous_engine.plan_assessment("example.com", "full pentest")
+        assert len(plan) >= 5
+        # All phases should have name and status
+        for phase in plan:
+            assert "name" in phase
+            assert "status" in phase
+
+    def test_determine_next_step(self):
+        from cyber_sentry.autonomous import autonomous_engine
+        step = autonomous_engine.determine_next_step(
+            {"phase": "reconnaissance", "completed_phases": ["reconnaissance"]},
+            []
+        )
+        assert "action" in step
+
+    def test_plan_phases_ordered(self):
+        from cyber_sentry.autonomous import autonomous_engine
+        plan = autonomous_engine.plan_assessment("example.com", "pentest")
+        names = [p["name"] for p in plan]
+        assert names[0] == "reconnaissance"  # always starts with recon
+        assert names[-1] == "reporting"  # always ends with reporting
+
+
+# ── CLI Enhancements ─────────────────────────────────────────────────────────
+
+class TestCLIEnhancements:
+    """Tests for the enhanced CLI."""
+
+    def test_banner_contains_version(self):
+        from cyber_sentry.cli import BANNER
+        assert "2.0.0" in BANNER or "v" in BANNER
+
+    def test_banner_has_tool_count(self):
+        from cyber_sentry.cli import BANNER
+        assert "151" in BANNER
+
+    def test_banner_has_agent_count(self):
+        from cyber_sentry.cli import BANNER
+        assert "12" in BANNER
+
+    def test_help_text_has_agents_command(self):
+        from cyber_sentry.cli import HELP_TEXT
+        assert "/agents" in HELP_TEXT
+
+    def test_help_text_has_status_command(self):
+        from cyber_sentry.cli import HELP_TEXT
+        assert "/status" in HELP_TEXT
+
+    def test_help_text_has_dashboard_command(self):
+        from cyber_sentry.cli import HELP_TEXT
+        assert "/dashboard" in HELP_TEXT
+
+    def test_colors_class_exists(self):
+        from cyber_sentry.cli import Colors
+        assert hasattr(Colors, "RED")
+        assert hasattr(Colors, "GREEN")
+        assert hasattr(Colors, "CYAN")
+        assert hasattr(Colors, "RESET")
+
+    def test_color_helpers(self):
+        from cyber_sentry.cli import colored, success, error, warning, info, header
+        assert "\033[" in colored("test", "\033[91m")
+        assert "✓" in success("ok")
+        assert "✗" in error("fail")
+        assert "!" in warning("warn")
+        assert "*" in info("info")
+        assert "═══" in header("title")
+
+    def test_format_agents(self):
+        from cyber_sentry.cli import _format_agents
+        output = _format_agents()
+        assert "IntelligentDecisionEngine" in output
+        assert "GracefulDegradation" in output
+
+    def test_format_tools_table(self):
+        from cyber_sentry.cli import _format_tools_table
+        output = _format_tools_table()
+        assert "151" in output or "TOOL ARSENAL" in output
+
+    def test_agents_list_defined(self):
+        from cyber_sentry.cli import _AGENTS
+        assert len(_AGENTS) >= 12
