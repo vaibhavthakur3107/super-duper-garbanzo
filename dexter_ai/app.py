@@ -285,15 +285,22 @@ def render_sidebar():
         )
         
         st.divider()
-        
+
         # Authorized scopes
         st.subheader("Authorized Scopes")
-        scopes = st.text_area(
-            "Allowed Targets",
-            value="example.com, test.local, 127.0.0.1, localhost",
-            height=80,
-            help="Comma-separated list of authorized targets"
-        )
+        open_scope = os.environ.get("SCOPE_MODE", "").strip().lower() == "open"
+        if open_scope:
+            st.success("🌐 Open-scope mode active — all targets accepted")
+            scopes = "*"
+        else:
+            from dexter_ai.guardrails.scope_validator import get_authorized_scopes
+            default_scopes = ", ".join(get_authorized_scopes())
+            scopes = st.text_area(
+                "Allowed Targets",
+                value=default_scopes,
+                height=80,
+                help="Comma-separated list of authorized targets. Set SCOPE_MODE=open in .env to allow all targets.",
+            )
         
         st.divider()
         
@@ -368,10 +375,15 @@ def main():
             st.error("Please enter a target")
         else:
             # Check scope
-            from dexter_ai.guardrails.scope_validator import validate_scope
-            if not validate_scope(target):
+            from dexter_ai.guardrails.scope_validator import validate_scope_with_list, _is_open_scope_mode
+            if scopes == "*" or _is_open_scope_mode():
+                scope_ok = True
+            else:
+                scope_list = [s.strip() for s in scopes.split(",") if s.strip()]
+                scope_ok = validate_scope_with_list(target, scope_list)
+            if not scope_ok:
                 st.error(f"Target '{target}' is not in the authorized scope!")
-                st.info("Add the target to the Authorized Scopes in the sidebar")
+                st.info("Add the target to the Authorized Scopes in the sidebar, or set SCOPE_MODE=open in .env")
             else:
                 # Start execution
                 st.session_state.is_running = True

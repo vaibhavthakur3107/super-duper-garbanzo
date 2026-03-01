@@ -59,6 +59,41 @@ class TestScopeValidator:
         assert validate_scope("example.com:8080") is True
 
 
+class TestOpenScopeMode:
+    """Tests for SCOPE_MODE=open (unrestricted scanning like hexstrike-ai)."""
+
+    def test_open_scope_allows_any_domain(self, monkeypatch):
+        monkeypatch.setenv("SCOPE_MODE", "open")
+        assert validate_scope("google.com") is True
+
+    def test_open_scope_allows_arbitrary_ip(self, monkeypatch):
+        monkeypatch.setenv("SCOPE_MODE", "open")
+        assert validate_scope("203.0.113.1") is True
+
+    def test_open_scope_allows_subdomain(self, monkeypatch):
+        monkeypatch.setenv("SCOPE_MODE", "open")
+        assert validate_scope("deep.nested.example.org") is True
+
+    def test_open_scope_still_rejects_empty(self, monkeypatch):
+        monkeypatch.setenv("SCOPE_MODE", "open")
+        assert validate_scope("") is False
+
+    def test_restricted_mode_still_blocks_public(self, monkeypatch):
+        monkeypatch.setenv("SCOPE_MODE", "restricted")
+        assert validate_scope("google.com") is False
+
+    def test_open_scope_validate_with_list(self, monkeypatch):
+        from dexter_ai.guardrails.scope_validator import validate_scope_with_list
+        monkeypatch.setenv("SCOPE_MODE", "open")
+        assert validate_scope_with_list("anything.com", ["example.com"]) is True
+
+    def test_restricted_validate_with_list(self, monkeypatch):
+        from dexter_ai.guardrails.scope_validator import validate_scope_with_list
+        monkeypatch.setenv("SCOPE_MODE", "restricted")
+        assert validate_scope_with_list("anything.com", ["example.com"]) is False
+        assert validate_scope_with_list("example.com", ["example.com"]) is True
+
+
 # ── Notes Manager ─────────────────────────────────────────────────────────────
 
 class TestNotesManager:

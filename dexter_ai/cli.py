@@ -236,8 +236,9 @@ def _format_specialists() -> str:
     """Render the specialist team status table."""
     status = specialist_team.get_team_status()
     specialists = status["specialists"]
+    team_size = status["team_size"]
     lines = [
-        f"\n  {colored(f'SPECIALIST TEAM — {status[\"team_size\"]} specialists', Colors.CYAN + Colors.BOLD)}",
+        f"\n  {colored(f'SPECIALIST TEAM — {team_size} specialists', Colors.CYAN + Colors.BOLD)}",
         "",
     ]
     status_colors = {
@@ -248,9 +249,10 @@ def _format_specialists() -> str:
     for s in specialists:
         sc = status_colors.get(s["status"], Colors.WHITE)
         caps = ", ".join(s["capabilities"])
+        s_status = s["status"].upper()
         lines.append(
             f"  {colored(s['name'], Colors.GREEN + Colors.BOLD)}"
-            f"  {colored(f'[{s[\"status\"].upper()}]', sc)}\n"
+            f"  {colored(f'[{s_status}]', sc)}\n"
             f"      {Colors.DIM}Role: {s['role']}  |  Capabilities: {caps}{Colors.RESET}"
         )
     return "\n".join(lines)
