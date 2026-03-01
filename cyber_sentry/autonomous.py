@@ -362,6 +362,25 @@ class AutonomousEngine:
         self._executed_phases.append(result)
         return result
 
+    def _calculate_risk(self, findings: list[dict]) -> float:
+        """Calculate a simple risk score (0-10) from accumulated findings."""
+        if not findings:
+            return 0.0
+        weights = {"critical": 10.0, "high": 8.0, "medium": 5.0, "low": 2.0}
+        total = 0.0
+        for f in findings:
+            cat = f.get("category", "").lower()
+            if "critical" in cat or "rce" in f.get("content", "").lower():
+                total += weights["critical"]
+            elif "high" in cat or "exploit" in cat:
+                total += weights["high"]
+            elif "vulnerability" in cat:
+                total += weights["medium"]
+            else:
+                total += weights["low"]
+        score = min(10.0, total / max(len(findings), 1) + min(len(findings) * 0.5, 4.0))
+        return round(score, 1)
+
     def run_autonomous(
         self,
         target: str,
@@ -414,7 +433,7 @@ class AutonomousEngine:
             "phases_executed": [p["phase"] for p in self._executed_phases],
             "phase_results": self._executed_phases,
             "findings": self._findings,
-            "risk_score": 0.0,
+            "risk_score": self._calculate_risk(self._findings),
             "team_status": self._team.get_team_status(),
             "started_at": started_at,
             "completed_at": datetime.now().isoformat(),

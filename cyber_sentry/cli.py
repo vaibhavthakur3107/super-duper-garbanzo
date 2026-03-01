@@ -24,6 +24,7 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
+from cyber_sentry import __version__
 from cyber_sentry.providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
 from cyber_sentry.notes import NotesManager
 
@@ -91,7 +92,7 @@ BANNER = (
     f"\n"
     f"  {Colors.DIM}{'─' * 56}{Colors.RESET}\n"
     f"  {Colors.GREEN}▸ AI-Powered Red Team Pentesting Agent{Colors.RESET}\n"
-    f"  {Colors.YELLOW}▸ v2.0{Colors.RESET}  "
+    f"  {Colors.YELLOW}▸ v{__version__}{Colors.RESET}  "
     f"{Colors.CYAN}Tools: 151+{Colors.RESET}  "
     f"{Colors.MAGENTA}Agents: 12+{Colors.RESET}  "
     f"{Colors.GREEN}Status: READY{Colors.RESET}\n"
@@ -146,7 +147,7 @@ HELP_TEXT = (
 )
 
 
-def _status_dashboard(target: str, notes: NotesManager, provider: str) -> str:
+def _status_dashboard(target: str, notes: NotesManager, provider: str, session_count: int = 0) -> str:
     """Render a status dashboard box."""
     note_count = len(notes.get_notes())
     t_display = target if target else "not set"
@@ -165,11 +166,11 @@ def _status_dashboard(target: str, notes: NotesManager, provider: str) -> str:
     border = Colors.CYAN
     lines = [
         f"  {border}╔{'═' * w}╗{Colors.RESET}",
-        f"  {border}║{Colors.RESET}  {Colors.BOLD}{Colors.CYAN}CYBER-SENTRY AI v2.0 — STATUS DASHBOARD{Colors.RESET}{' ' * (w - 41)}{border}║{Colors.RESET}",
+        f"  {border}║{Colors.RESET}  {Colors.BOLD}{Colors.CYAN}CYBER-SENTRY AI v{__version__} — STATUS DASHBOARD{Colors.RESET}{' ' * max(0, w - 39 - len(__version__))}{border}║{Colors.RESET}",
         f"  {border}╠{'═' * w}╣{Colors.RESET}",
         f"  {border}║{Colors.RESET}  🎯 Target: {t_display:<20s}  Status: {status}{' ' * max(0, w - 43 - len(t_display))}{border}║{Colors.RESET}",
         f"  {border}║{Colors.RESET}  🔧 Tools:  151+{' ' * 17}Agents: 12+{' ' * (w - 48)}{border}║{Colors.RESET}",
-        f"  {border}║{Colors.RESET}  📋 Notes:  {note_count:<20d} Sessions: 0{' ' * (w - 48)}{border}║{Colors.RESET}",
+        f"  {border}║{Colors.RESET}  📋 Notes:  {note_count:<20d} Sessions: {session_count:<9d}{border}║{Colors.RESET}",
         f"  {border}║{Colors.RESET}  💾 Cache:  {hits} hits / {misses} misses{' ' * max(0, w - 37 - len(str(hits)) - len(str(misses)))}Provider: {provider:<8s}{border}║{Colors.RESET}",
         f"  {border}╚{'═' * w}╝{Colors.RESET}",
     ]
@@ -420,7 +421,7 @@ def interactive_mode(args: argparse.Namespace):
             continue
 
         if prompt in ("/status", "/dashboard"):
-            print(f"\n{_status_dashboard(target, notes, provider)}")
+            print(f"\n{_status_dashboard(target, notes, provider, session_count=len(session_results))}")
             continue
 
         if prompt == "/clear":
