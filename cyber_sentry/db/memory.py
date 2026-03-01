@@ -7,7 +7,7 @@ import sqlite3
 import json
 import os
 from datetime import datetime
-from typing import Optional, list
+from typing import Optional
 from pathlib import Path
 
 
