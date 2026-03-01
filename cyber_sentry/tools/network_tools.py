@@ -227,6 +227,72 @@ def extract_cves(nuclei_output: str) -> list:
     return cves
 
 
+def web_search(query: str, target: str = "") -> str:
+    """
+    Perform a web search using Tavily API (like PentestAgent).
+    Falls back to a curl-based DuckDuckGo instant-answer query when
+    TAVILY_API_KEY is not set.
+
+    Args:
+        query: Search query string
+        target: Optional target context (prepended to query if provided)
+    """
+    if target and target not in query:
+        query = f"{query} {target}"
+
+    api_key = os.environ.get("TAVILY_API_KEY", "")
+
+    if api_key:
+        try:
+            import httpx  # already in requirements.txt
+            response = httpx.post(
+                "https://api.tavily.com/search",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "api_key": api_key,
+                    "query": query,
+                    "search_depth": "basic",
+                    "include_answer": True,
+                    "max_results": 5,
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            data = response.json()
+            answer = data.get("answer", "")
+            results = data.get("results", [])
+            lines = []
+            if answer:
+                lines.append(f"Answer: {answer}\n")
+            for r in results:
+                lines.append(f"[{r.get('title', '')}] {r.get('url', '')}")
+                if r.get("content"):
+                    lines.append(f"  {r['content'][:200]}")
+            return "\n".join(lines) if lines else "No results found."
+        except Exception as e:  # noqa: BLE001
+            return f"Tavily search error: {e}"
+
+    # Fallback: DuckDuckGo instant-answer API (no key required)
+    safe_query = query.replace(" ", "+")
+    command = (
+        f'curl -s "https://api.duckduckgo.com/?q={safe_query}&format=json&no_html=1&skip_disambig=1"'
+    )
+    output = run_command(command, timeout=15)
+    try:
+        import json as _json
+        data = _json.loads(output)
+        abstract = data.get("AbstractText", "")
+        related = [r.get("Text", "") for r in data.get("RelatedTopics", [])[:3]]
+        parts = []
+        if abstract:
+            parts.append(f"Summary: {abstract}")
+        if related:
+            parts.append("Related:\n" + "\n".join(f"  - {t}" for t in related if t))
+        return "\n".join(parts) if parts else f"No instant answer for: {query}"
+    except Exception:  # noqa: BLE001
+        return output or f"No results for: {query}"
+
+
 class ToolRegistry:
     """Registry of all available security tools"""
     
@@ -265,6 +331,11 @@ class ToolRegistry:
             "dig_lookup": {
                 "function": dig_lookup,
                 "description": "DNS lookup tool",
+                "category": "reconnaissance"
+            },
+            "web_search": {
+                "function": web_search,
+                "description": "Web search (Tavily or DuckDuckGo fallback)",
                 "category": "reconnaissance"
             },
         }

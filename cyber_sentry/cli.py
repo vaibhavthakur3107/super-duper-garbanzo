@@ -38,16 +38,19 @@ BANNER = r"""
 
 HELP_TEXT = """
 Commands:
-  /agent <task>     Run autonomous agent on task
-  /target <host>    Set target
-  /playbook <name>  Load and run a playbook
-  /notes            Show saved notes / loot
-  /report           Generate Markdown report for current session
-  /playbooks        List available playbooks
-  /tools            List available tools
-  /clear            Clear current session
-  /quit             Exit  (also /exit, /q)
-  /help             Show this help  (also /h, /?)
+  /agent <task>        Run autonomous agent on task
+  /target <host>       Set target
+  /playbook <name>     Load and run a playbook
+  /notes               Show saved notes / loot
+  /report              Generate Markdown report for current session
+  /playbooks           List available playbooks
+  /tools               List available tools
+  /mcp list            List configured MCP servers
+  /mcp add <n> <cmd>   Add MCP server (name + command)
+  /mcp test <name>     Test MCP server availability
+  /clear               Clear current session
+  /quit                Exit  (also /exit, /q)
+  /help                Show this help  (also /h, /?)
 """
 
 
@@ -89,6 +92,42 @@ def _parse_playbook_minimal(name: str) -> dict | None:
             elif line.startswith("category:"):
                 result["category"] = line.split(":", 1)[1].strip()
     return result
+
+
+def _handle_mcp_command(prompt: str):
+    """Handle /mcp <subcommand> in the interactive REPL."""
+    from cyber_sentry.mcp import MCPClient  # noqa: C0415
+    client = MCPClient()
+    parts = prompt.split()
+    sub = parts[1] if len(parts) > 1 else "list"
+
+    if sub == "list":
+        servers = client.list_servers()
+        if not servers:
+            print("[*] No MCP servers configured. Copy mcp_servers.json.example → mcp_servers.json")
+            return
+        for s in servers:
+            status = "✓" if s["available"] else "✗"
+            print(f"  {status} {s['name']:<16s}  {s['command']}  {s.get('description','')}")
+
+    elif sub == "add" and len(parts) >= 4:
+        name, command = parts[2], parts[3]
+        args = parts[4:] if len(parts) > 4 else []
+        cfg = client.add_server(name, command, args=args)
+        print(f"[+] MCP server '{cfg.name}' added → mcp_servers.json")
+
+    elif sub == "test" and len(parts) >= 3:
+        name = parts[2]
+        ok, msg = client.test_server(name)
+        print(f"[{'+' if ok else '!'}] {msg}")
+
+    elif sub == "remove" and len(parts) >= 3:
+        name = parts[2]
+        removed = client.remove_server(name)
+        print(f"[{'+' if removed else '!'}] {'Removed' if removed else 'Not found'}: {name}")
+
+    else:
+        print("Usage: /mcp list | /mcp add <name> <command> [args...] | /mcp test <name> | /mcp remove <name>")
 
 
 async def run_agent(target: str, task: str, model: str, provider: str, notes: NotesManager) -> dict:
@@ -199,6 +238,11 @@ def interactive_mode(args: argparse.Namespace):
             print("[*] Session cleared.")
             continue
 
+        # ── MCP commands ─────────────────────────────────────────────────────
+        if prompt.startswith("/mcp"):
+            _handle_mcp_command(prompt)
+            continue
+
         if prompt.startswith("/playbook "):
             pb_name = prompt[10:].strip()
             pb = load_playbook(pb_name)
@@ -292,6 +336,12 @@ def main():
     # ── playbooks subcommand ─────────────────────────────────────────────────
     sub.add_parser("playbooks", help="List available playbooks")
 
+    # ── mcp subcommand ───────────────────────────────────────────────────────
+    mcp_parser = sub.add_parser("mcp", help="Manage MCP servers")
+    mcp_parser.add_argument("mcp_action", choices=["list", "add", "test", "remove"],
+                            help="MCP action")
+    mcp_parser.add_argument("mcp_args", nargs="*", help="Action arguments")
+
     args = parser.parse_args()
 
     if args.command == "run":
@@ -305,6 +355,8 @@ def main():
             pb = load_playbook(name)
             desc = pb.get("description", "").split("\n")[0].strip() if pb else ""
             print(f"  {name:<20s}  {desc}")
+    elif args.command == "mcp":
+        _handle_mcp_command(f"/mcp {args.mcp_action} {' '.join(args.mcp_args)}")
     else:
         interactive_mode(args)
 

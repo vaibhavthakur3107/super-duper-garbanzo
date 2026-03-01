@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "nmap": {
+      "command": "npx",
+      "args": ["-y", "gc-nmap-mcp"],
+      "env": {
+        "NMAP_PATH": "/usr/bin/nmap"
+      },
+      "description": "nmap MCP server for network scanning"
+    }
+  }
+}

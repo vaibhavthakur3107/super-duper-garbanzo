@@ -234,3 +234,143 @@ class TestNetworkToolHelpers:
         ok, err = sanitize_command("nmap -sV -sC -T4 example.com")
         assert ok is True
         assert err == ""
+
+    def test_web_search_in_registry(self):
+        from cyber_sentry.tools.network_tools import tool_registry
+        names = [t["name"] for t in tool_registry.list_tools()]
+        assert "web_search" in names
+
+
+# ── MCP Client ────────────────────────────────────────────────────────────────
+
+class TestMCPClient:
+    """Tests for the MCP client (no actual MCP server required)."""
+
+    @pytest.fixture
+    def mcp(self, tmp_path):
+        from cyber_sentry.mcp import MCPClient
+        return MCPClient(config_path=tmp_path / "mcp_servers.json")
+
+    def test_list_empty_initially(self, mcp):
+        assert mcp.list_servers() == []
+
+    def test_add_server(self, mcp):
+        cfg = mcp.add_server("nmap", "npx", args=["-y", "gc-nmap-mcp"],
+                             description="nmap MCP")
+        assert cfg.name == "nmap"
+        assert cfg.command == "npx"
+        assert cfg.args == ["-y", "gc-nmap-mcp"]
+
+    def test_list_after_add(self, mcp):
+        mcp.add_server("nmap", "npx")
+        servers = mcp.list_servers()
+        assert len(servers) == 1
+        assert servers[0]["name"] == "nmap"
+
+    def test_get_server(self, mcp):
+        mcp.add_server("burp", "java", args=["-jar", "burpsuite.jar"])
+        cfg = mcp.get_server("burp")
+        assert cfg is not None
+        assert cfg.command == "java"
+
+    def test_get_missing_server(self, mcp):
+        assert mcp.get_server("does_not_exist") is None
+
+    def test_remove_server(self, mcp):
+        mcp.add_server("test", "echo")
+        removed = mcp.remove_server("test")
+        assert removed is True
+        assert mcp.get_server("test") is None
+
+    def test_remove_missing_returns_false(self, mcp):
+        assert mcp.remove_server("nonexistent") is False
+
+    def test_persisted_to_disk(self, tmp_path):
+        from cyber_sentry.mcp import MCPClient
+        mcp1 = MCPClient(config_path=tmp_path / "mcp.json")
+        mcp1.add_server("nmap", "npx", description="test")
+        # Load fresh instance
+        mcp2 = MCPClient(config_path=tmp_path / "mcp.json")
+        servers = mcp2.list_servers()
+        assert len(servers) == 1
+        assert servers[0]["description"] == "test"
+
+    def test_test_unavailable_command(self, mcp):
+        mcp.add_server("fake", "this_command_does_not_exist_9x7z")
+        ok, msg = mcp.test_server("fake")
+        assert ok is False
+        assert "not found" in msg.lower()
+
+    def test_test_missing_server(self, mcp):
+        ok, msg = mcp.test_server("not_configured")
+        assert ok is False
+
+    def test_load_from_example_format(self, tmp_path):
+        """Verify the example JSON format loads correctly."""
+        import json
+        from cyber_sentry.mcp import MCPClient
+        config = {
+            "mcpServers": {
+                "nmap": {
+                    "command": "npx",
+                    "args": ["-y", "gc-nmap-mcp"],
+                    "env": {"NMAP_PATH": "/usr/bin/nmap"},
+                    "description": "nmap MCP server",
+                }
+            }
+        }
+        cfg_path = tmp_path / "mcp_servers.json"
+        cfg_path.write_text(json.dumps(config))
+        client = MCPClient(config_path=cfg_path)
+        servers = client.list_servers()
+        assert len(servers) == 1
+        assert servers[0]["name"] == "nmap"
+        assert servers[0]["args"] == ["-y", "gc-nmap-mcp"]
+
+
+# ── Knowledge Base ────────────────────────────────────────────────────────────
+
+class TestKnowledgeBase:
+    """Tests for the knowledge module."""
+
+    @pytest.fixture
+    def kb(self, tmp_path):
+        from cyber_sentry.knowledge import KnowledgeBase
+        sources = tmp_path / "sources"
+        sources.mkdir()
+        (sources / "web.md").write_text("# Web Methodology\nAlways check OWASP Top 10.")
+        (sources / "network.txt").write_text("Phase 1: Host Discovery\nnmap -sn target")
+        return KnowledgeBase(sources_dir=sources)
+
+    def test_list_sources(self, kb):
+        names = kb.list_sources()
+        assert "web" in names
+        assert "network" in names
+
+    def test_get_document(self, kb):
+        doc = kb.get("web")
+        assert doc is not None
+        assert "OWASP" in doc
+
+    def test_get_missing_returns_none(self, kb):
+        assert kb.get("nonexistent") is None
+
+    def test_get_context_all(self, kb):
+        ctx = kb.get_context()
+        assert "Web Methodology" in ctx
+        assert "Host Discovery" in ctx
+
+    def test_get_context_with_query(self, kb):
+        ctx = kb.get_context("web")
+        assert "OWASP" in ctx
+
+    def test_get_context_empty_sources(self, tmp_path):
+        from cyber_sentry.knowledge import KnowledgeBase
+        kb = KnowledgeBase(sources_dir=tmp_path / "empty")
+        assert kb.get_context() == ""
+
+    def test_builtin_sources_loaded(self):
+        """The built-in knowledge/sources/ directory should have at least one doc."""
+        from cyber_sentry.knowledge import knowledge_base
+        knowledge_base.reload()
+        assert len(knowledge_base.list_sources()) >= 1

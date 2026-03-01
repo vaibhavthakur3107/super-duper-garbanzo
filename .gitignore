@@ -56,6 +56,9 @@ cyber_sentry/ui/.vite/
 # Environment variables – never commit secrets
 .env
 
+# MCP server config – may contain env vars with secrets
+mcp_servers.json
+
 # Loot / session output
 loot/*.json
 loot/*.md

@@ -1,133 +1,115 @@
-# Silent Prompt Injection Challenge Analysis
+# 🛡️ Cyber-Sentry AI
 
-This repository contains analysis and tooling for the "Silent Prompt Injection" CTF challenge hosted at `https://silents-prompt-injection.netlify.app/`.
+> AI-powered autonomous Red Team Pentesting Agent — similar to [PentestGPT](https://github.com/GreyDGL/PentestGPT), [Pentagi](https://github.com/vxcontrol/pentagi), [PentestAgent](https://github.com/GH05TCREW/pentestagent), and [Shannon](https://github.com/KeygraphHQ/shannon).
 
-## Challenge Description
+[![Python](https://img.shields.io/badge/Python-3.10+-green)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)](Dockerfile)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agent_Graph-blue)](cyber_sentry/main.py)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-passing-brightgreen)](tests/)
 
-The challenge presents a browser-based game called "Highway Runner - Scorpio Edition" where players must navigate a vehicle to reach a score of 91. Upon winning, an encoded reward string is displayed that allegedly contains the flag.
+---
 
-**Key Indicators:**
-- Challenge name suggests prompt injection vulnerability
-- Description mentions "smallest details" hinting at steganography
-- Encoded reward string stored in client-side JavaScript
-- No obvious decoding mechanism in the source code
+## 📖 Overview
 
-## Repository Contents
+Cyber-Sentry is a production-ready **multi-agent pentesting system** built with:
 
-### `SOLUTION.md`
-Comprehensive write-up documenting:
-- Reconnaissance findings
-- Source code analysis (HTML, JavaScript, CSS)
-- Cryptanalysis attempts and results
-- Alternative attack vectors explored
-- Conclusions and recommendations
+- **LangGraph** for agent orchestration (Supervisor → Guardrail → Planner → Tool → Reflection loop)
+- **Ollama / OpenAI / Anthropic / OpenRouter** for LLM inference
+- **Streamlit** web UI with live Thought-Trace visualisation
+- **FastAPI** REST + WebSocket backend
+- **Interactive CLI** (REPL with `/agent`, `/playbook`, `/notes`, `/report` commands)
+- **Attack Playbooks** (web pentest, network audit, recon, CTF)
+- **Notes / Loot** persistence across sessions
+- **MCP (Model Context Protocol)** integration for external tool servers
+- **Docker** for isolated, reproducible execution
 
-### `decoder.py`
-Automated Python script that attempts multiple decoding methods:
-- Single-byte XOR (all 256 keys)
-- Multi-byte XOR with contextual keywords
-- Caesar cipher (all shifts)
-- ROT47
-- Vigenère cipher
-- Atbash cipher
-- XOR key derivation from known plaintext
+For detailed documentation see [`cyber_sentry/README.md`](cyber_sentry/README.md).
 
-## Usage
+---
 
-### Run the Decoder
+## 🚀 Quickstart
 
 ```bash
-python3 decoder.py
+# 1. Clone
+git clone https://github.com/vaibhavthakur3107/super-duper-garbanzo.git
+cd super-duper-garbanzo
+
+# 2. Configure
+cp .env.example .env
+# edit .env with your API key(s)
+
+# 3a. Docker (recommended – includes nmap, nikto, dig, etc.)
+docker compose up          # Streamlit UI → http://localhost:8501
+
+# 3b. Local Python
+make setup                 # installs deps + creates .env
+make run                   # Streamlit UI → http://localhost:8501
+make run-cli               # interactive CLI
 ```
 
-The script will systematically test various decoding methods and report any findings.
+---
 
-### Manual Analysis
+## 🖥️ CLI
 
-1. **Access the Challenge:**
-   ```bash
-   curl -s https://silents-prompt-injection.netlify.app/ > challenge.html
-   curl -s https://silents-prompt-injection.netlify.app/script.js > script.js
-   curl -s https://silents-prompt-injection.netlify.app/style.css > style.css
-   ```
+```bash
+python -m cyber_sentry.cli                          # interactive REPL
+python -m cyber_sentry.cli -t 192.168.1.1           # pre-set target
+python -m cyber_sentry.cli run -t example.com \
+    --playbook web_pentest --report                  # one-shot + report
 
-2. **Extract the Encoded String:**
-   ```bash
-   grep "rewardData" script.js
-   ```
-
-3. **Test Custom Decoding:**
-   ```python
-   encoded = "l5VKR[9`b1/4axikt52,e>.{N#K3u*KUL)sf&kASAJ!/%NKUPGKb@,ESc!m/LvBRDJab,fP1G$X%i9tout0=|<}YA1Z%`8{i2a/2b"
-   # Your decoding logic here
-   ```
-
-## Challenge Insights
-
-### Encoded String Properties
-- **Length:** 101 characters
-- **Character Set:** Mixed ASCII printable (letters, digits, punctuation)
-- **Entropy:** High, suggesting strong encryption or encoding
-- **Context:** Displayed in-game after reaching score 91
-
-### Failed Approaches
-1. **Simple Ciphers:** Caesar, ROT13, ROT47, Atbash - no valid output
-2. **Single-byte XOR:** Tested all 256 keys - no clean FLAG{ pattern
-3. **Contextual Multi-byte XOR:** Keywords like SCORPIO, HIGHWAY, 91 - no success
-4. **Hidden Content:** No steganography in CSS/HTML
-5. **Hidden Files:** Common paths (robots.txt, flag.txt, etc.) return 404
-
-### Potential Solutions
-
-1. **Play to Win:** Complete the game in-browser to trigger any dynamic decoding
-2. **Advanced Cryptanalysis:** The cipher may be custom or layered
-3. **Server-Side Decoding:** An API endpoint might process the score/time
-4. **Visual Rendering:** The font/styling might encode the message when displayed
-
-## Technical Details
-
-### Game Mechanics
-- Arrow keys control vehicle movement
-- Three lanes of traffic
-- Obstacles spawn randomly
-- Score increases with distance traveled
-- Win condition: Score ≥ 91
-
-### Source Files
-- `index.html`: 108 lines
-- `script.js`: 247 lines  
-- `style.css`: 609 lines
-
-### Encoded Reward Location
-```javascript
-// In script.js
-const rewardData = "l5VKR[9`b1/4axikt52,e>.{N#K3u*KUL)sf&kASAJ!/%NKUPGKb@,ESc!m/LvBRDJab,fP1G$X%i9tout0=|<}YA1Z%`8{i2a/2b";
-
-// Displayed on win
-function endGame(isWin) {
-    if (isWin) {
-        const rewardContent = document.getElementById('rewardContent');
-        rewardContent.textContent = rewardData;
-        winScreen.classList.add('active');
-    }
-}
+# MCP server management
+python -m cyber_sentry.cli mcp list
+python -m cyber_sentry.cli mcp add nmap npx gc-nmap-mcp
 ```
 
-## Tools & Technologies
+---
 
-- **Python 3:** Cryptanalysis and automation
-- **curl:** HTTP requests and file retrieval
-- **grep:** Pattern matching and extraction
-- **Standard crypto libraries:** base64, itertools
+## 📋 Playbooks
 
-## Contributing
+| Name | Category | Description |
+|---|---|---|
+| `web_pentest` | Web | Full black-box web app penetration test |
+| `network_audit` | Network | Infrastructure audit with SSL/TLS review |
+| `recon` | Recon | Passive OSINT + active enum, no exploitation |
+| `ctf` | CTF | Capture The Flag challenge solver |
 
-If you solve this challenge or discover new attack vectors, please document your findings and submit a pull request.
+---
 
-## License
+## 🔌 LLM Providers
 
-This analysis is for educational purposes only. All rights to the original challenge belong to its creator.
+| Provider | Env Var | Default Model |
+|---|---|---|
+| **Ollama** (default, local) | `OLLAMA_BASE_URL` | `llama3` |
+| **OpenAI** | `OPENAI_API_KEY` | `gpt-4o-mini` |
+| **Anthropic** | `ANTHROPIC_API_KEY` | `claude-3-haiku-20240307` |
+| **OpenRouter** | `OPENROUTER_API_KEY` | `openai/gpt-4o-mini` |
 
-## Contact
+---
 
-For questions or collaboration, open an issue in this repository.
+## 🧩 MCP Support
+
+Cyber-Sentry supports [Model Context Protocol](https://modelcontextprotocol.io/) servers, letting you plug in any MCP-compatible tool (nmap, Metasploit, Burp Suite extensions, etc.).
+
+```bash
+# Configure MCP servers
+cp mcp_servers.json.example mcp_servers.json
+# edit mcp_servers.json with your MCP server configs
+
+# Use in CLI
+/mcp list
+/mcp add nmap npx gc-nmap-mcp
+```
+
+---
+
+## 🧠 Knowledge Base
+
+Place domain knowledge, CVE notes, or methodologies in `cyber_sentry/knowledge/sources/` — they are injected into the agent context automatically at runtime.
+
+---
+
+## ⚠️ Disclaimer
+
+For educational and authorised security testing only. Always obtain written permission before scanning any target.
+

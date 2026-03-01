@@ -26,6 +26,9 @@ Cyber-Sentry is a multi-agent pentesting system that uses:
 - **Docker** for isolated, reproducible execution with security tools pre-installed
 - **Playbooks** for structured, repeatable attack scenarios
 - **Notes/Loot** system to persist findings across sessions
+- **MCP (Model Context Protocol)** client for external tool server integration
+- **Knowledge Base** for domain methodology / RAG context injection
+- **Web Search** via Tavily or DuckDuckGo fallback
 
 ## 📂 Project Structure
 
@@ -42,9 +45,14 @@ cyber_sentry/
 │   ├── network_audit.yaml     # Network infrastructure audit
 │   ├── recon.yaml             # Reconnaissance only
 │   └── ctf.yaml               # CTF challenge solver
+├── mcp/
+│   └── __init__.py            # MCP client (add/remove/list/call servers)
+├── knowledge/
+│   ├── __init__.py            # KnowledgeBase (RAG context injection)
+│   └── sources/               # Place .md / .txt methodology notes here
 ├── agents/                    # Agent implementations
 ├── tools/
-│   ├── network_tools.py       # Nmap, Nikto, Gobuster wrappers
+│   ├── network_tools.py       # Nmap, Nikto, Gobuster, web_search wrappers
 │   └── registry.py            # Tool registry
 ├── guardrails/
 │   ├── security.py            # Security guardrails
@@ -379,9 +387,68 @@ python -m pytest tests/ -v
 | Streamlit web UI | ✅ | ❌ | ❌ | ✅ |
 | FastAPI REST backend | ✅ | ❌ | ❌ | ✅ |
 | LangGraph state machine | ✅ | ❌ | ❌ | ❌ |
+| MCP tool server support | ✅ | ❌ | ✅ | ❌ |
+| Knowledge base / RAG | ✅ | ❌ | ✅ | ❌ |
+| Web search tool | ✅ | ❌ | ✅ | ❌ |
 | Scope validation guardrail | ✅ | ✅ | ✅ | ✅ |
 | Prompt injection protection | ✅ | ✅ | ✅ | ✅ |
 | Test suite | ✅ | ✅ | ✅ | ✅ |
+
+## 🧩 MCP (Model Context Protocol)
+
+Cyber-Sentry can connect to any MCP-compatible tool server, including nmap MCP, Burp Suite MCP, Metasploit MCP, and custom servers.
+
+```bash
+# 1. Copy and edit the example config
+cp mcp_servers.json.example mcp_servers.json
+
+# 2. Add a server via CLI
+python -m cyber_sentry.cli mcp add nmap npx -y gc-nmap-mcp
+
+# 3. In interactive mode
+/mcp list               # show configured servers
+/mcp add nmap npx ...   # add a server
+/mcp test nmap          # check it is available
+```
+
+`mcp_servers.json` format (same as PentestAgent):
+
+```json
+{
+  "mcpServers": {
+    "nmap": {
+      "command": "npx",
+      "args": ["-y", "gc-nmap-mcp"],
+      "env": { "NMAP_PATH": "/usr/bin/nmap" },
+      "description": "nmap MCP server"
+    }
+  }
+}
+```
+
+## 🧠 Knowledge Base
+
+Place domain knowledge, pentest methodologies, CVE notes, or wordlists under
+`cyber_sentry/knowledge/sources/` as `.md` or `.txt` files.
+They are injected into agent prompts at runtime.
+
+```bash
+# Example
+echo "# SQL Injection Cheatsheet\n' OR 1=1 --" \
+    > cyber_sentry/knowledge/sources/sqli.md
+```
+
+Two built-in sources are provided: `web_methodology.md` and `network_methodology.md`.
+
+## 🔍 Web Search
+
+The `web_search` tool is available to the agent. It uses:
+1. **Tavily** (if `TAVILY_API_KEY` is set) — AI-powered search results
+2. **DuckDuckGo Instant Answer** — free fallback, no key required
+
+```bash
+export TAVILY_API_KEY=tvly-...   # optional
+```
 
 ## 📜 License
 
