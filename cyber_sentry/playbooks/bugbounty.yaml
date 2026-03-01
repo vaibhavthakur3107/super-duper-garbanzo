@@ -1,0 +1,96 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: Bug Bounty Hunting
+# Inspired by HexStrike AI BugBounty workflow
+# ──────────────────────────────────────────────────────────────────────────────
+name: bugbounty
+description: >
+  Comprehensive bug bounty reconnaissance and vulnerability discovery.
+  Covers subdomain enumeration, JavaScript analysis, parameter discovery,
+  and common bug-class testing (XSS, SQLi, SSRF, IDOR, open redirects).
+version: "1.0"
+category: bugbounty
+
+phases:
+  - name: subdomain_enumeration
+    description: Discover all in-scope subdomains passively and actively
+    tools:
+      - amass_enum
+      - subfinder
+      - theharvester
+    steps:
+      - "Run amass enum -passive -d {target} to gather passive subdomains"
+      - "Run subfinder -d {target} -silent for fast passive discovery"
+      - "Resolve discovered subdomains: httpx -l subdomains.txt -status-code"
+      - "Check for subdomain takeover: subjack -w subdomains.txt"
+
+  - name: url_collection
+    description: Harvest all known URLs from archives and live crawling
+    tools:
+      - gau
+      - waybackurls
+      - katana
+      - hakrawler
+    steps:
+      - "Run gau {target} to fetch all archived URLs"
+      - "Run waybackurls {target} for Wayback Machine history"
+      - "Run katana -u http://{target} for live endpoint crawling"
+      - "Deduplicate and filter results with uro or anew"
+
+  - name: technology_fingerprinting
+    description: Identify the full technology stack
+    tools:
+      - httpx
+      - whatweb
+      - wafw00f
+    steps:
+      - "Run httpx for server headers, status codes, and tech detection"
+      - "Run whatweb for CMS, framework, and library identification"
+      - "Run wafw00f to detect Web Application Firewalls"
+
+  - name: parameter_discovery
+    description: Find injectable parameters across the application
+    tools:
+      - arjun
+      - paramspider
+    steps:
+      - "Run arjun -u http://{target} for parameter discovery"
+      - "Run paramspider -d {target} to mine params from web archives"
+      - "Filter and prioritize reflected/SQL-injectable parameters"
+
+  - name: vulnerability_hunting
+    description: Test for OWASP Top 10 and common bug bounty vulnerabilities
+    tools:
+      - nuclei_scan
+      - dalfox
+      - sqlmap_scan
+      - commix
+    steps:
+      - "Run nuclei with XSS, SSRF, open-redirect, and CVE templates"
+      - "Run dalfox for automated XSS detection on discovered parameters"
+      - "Test SQLi on form parameters with sqlmap"
+      - "Check for command injection with commix"
+      - "Manual IDOR testing on enumerated API endpoints"
+
+  - name: secret_scanning
+    description: Hunt for leaked credentials and sensitive data
+    tools:
+      - trufflehog
+      - gau
+    steps:
+      - "Run trufflehog on any associated git repositories"
+      - "Search archived JS files for hardcoded API keys and tokens"
+      - "Check .env, backup, and config file exposure"
+
+success_criteria:
+  - "Full subdomain inventory with live host list"
+  - "Complete URL and parameter map"
+  - "Confirmed vulnerability findings with PoC"
+  - "Severity rating per finding (P1–P5)"
+
+report_sections:
+  - executive_summary
+  - scope
+  - findings
+  - reproduction_steps
+  - impact_assessment
+  - remediation

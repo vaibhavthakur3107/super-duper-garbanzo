@@ -374,3 +374,212 @@ class TestKnowledgeBase:
         from cyber_sentry.knowledge import knowledge_base
         knowledge_base.reload()
         assert len(knowledge_base.list_sources()) >= 1
+
+
+# ── Expanded Tool Arsenal (67 tools) ─────────────────────────────────────────
+
+class TestExpandedToolArsenal:
+    """Tests for the 67-tool arsenal added in the tool expansion."""
+
+    @pytest.fixture
+    def registry(self):
+        from cyber_sentry.tools.network_tools import ToolRegistry
+        return ToolRegistry()
+
+    def _names(self, registry):
+        return [t["name"] for t in registry.list_tools()]
+
+    # -- total count --
+    def test_tool_count_at_least_60(self, registry):
+        assert len(registry.list_tools()) >= 60
+
+    # -- Network reconnaissance --
+    def test_rustscan_registered(self, registry):
+        assert "rustscan" in self._names(registry)
+
+    def test_masscan_registered(self, registry):
+        assert "masscan" in self._names(registry)
+
+    def test_amass_registered(self, registry):
+        assert "amass_enum" in self._names(registry)
+
+    def test_subfinder_registered(self, registry):
+        assert "subfinder" in self._names(registry)
+
+    def test_theharvester_registered(self, registry):
+        assert "theharvester" in self._names(registry)
+
+    def test_enum4linux_registered(self, registry):
+        assert "enum4linux" in self._names(registry)
+
+    def test_smbmap_registered(self, registry):
+        assert "smbmap" in self._names(registry)
+
+    # -- Web application --
+    def test_feroxbuster_registered(self, registry):
+        assert "feroxbuster" in self._names(registry)
+
+    def test_ffuf_registered(self, registry):
+        assert "ffuf" in self._names(registry)
+
+    def test_dalfox_registered(self, registry):
+        assert "dalfox" in self._names(registry)
+
+    def test_wpscan_registered(self, registry):
+        assert "wpscan" in self._names(registry)
+
+    def test_wafw00f_registered(self, registry):
+        assert "wafw00f" in self._names(registry)
+
+    def test_whatweb_registered(self, registry):
+        assert "whatweb" in self._names(registry)
+
+    def test_testssl_registered(self, registry):
+        assert "testssl" in self._names(registry)
+
+    def test_commix_registered(self, registry):
+        assert "commix" in self._names(registry)
+
+    def test_tplmap_registered(self, registry):
+        assert "tplmap" in self._names(registry)
+
+    # -- Authentication --
+    def test_hydra_registered(self, registry):
+        assert "hydra" in self._names(registry)
+
+    def test_hashcat_registered(self, registry):
+        assert "hashcat" in self._names(registry)
+
+    def test_john_registered(self, registry):
+        assert "john_crack" in self._names(registry)
+
+    # -- OSINT --
+    def test_sherlock_registered(self, registry):
+        assert "sherlock" in self._names(registry)
+
+    def test_trufflehog_registered(self, registry):
+        assert "trufflehog" in self._names(registry)
+
+    def test_shodan_registered(self, registry):
+        assert "shodan_search" in self._names(registry)
+
+    # -- Forensics / Binary --
+    def test_volatility3_registered(self, registry):
+        assert "volatility3" in self._names(registry)
+
+    def test_exiftool_registered(self, registry):
+        assert "exiftool" in self._names(registry)
+
+    def test_radare2_registered(self, registry):
+        assert "radare2" in self._names(registry)
+
+    def test_checksec_registered(self, registry):
+        assert "checksec" in self._names(registry)
+
+    # -- Cloud --
+    def test_trivy_registered(self, registry):
+        assert "trivy_scan" in self._names(registry)
+
+    def test_prowler_registered(self, registry):
+        assert "prowler" in self._names(registry)
+
+    def test_kube_hunter_registered(self, registry):
+        assert "kube_hunter" in self._names(registry)
+
+    # -- Categories present --
+    def test_authentication_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "authentication" in cats
+
+    def test_osint_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "osint" in cats
+
+    def test_forensics_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "forensics" in cats
+
+    def test_binary_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "binary" in cats
+
+    def test_cloud_category_exists(self, registry):
+        cats = {t["category"] for t in registry.list_tools()}
+        assert "cloud" in cats
+
+
+# ── New Playbooks ─────────────────────────────────────────────────────────────
+
+class TestNewPlaybooks:
+    """Tests for the 3 new playbooks added in the tool expansion."""
+
+    def test_bugbounty_discoverable(self):
+        assert "bugbounty" in list_playbooks()
+
+    def test_cloud_security_discoverable(self):
+        assert "cloud_security" in list_playbooks()
+
+    def test_binary_forensics_discoverable(self):
+        assert "binary_forensics" in list_playbooks()
+
+    def test_bugbounty_loads(self):
+        pb = load_playbook("bugbounty")
+        assert pb is not None
+        assert pb.get("name") == "bugbounty"
+
+    def test_cloud_security_loads(self):
+        pb = load_playbook("cloud_security")
+        assert pb is not None
+        assert pb.get("category") == "cloud"
+
+    def test_binary_forensics_loads(self):
+        pb = load_playbook("binary_forensics")
+        assert pb is not None
+        assert pb.get("category") == "forensics"
+
+    def test_total_playbook_count_at_least_7(self):
+        assert len(list_playbooks()) >= 7
+
+
+# ── New Knowledge Sources ─────────────────────────────────────────────────────
+
+class TestNewKnowledgeSources:
+    """Tests for the 3 new knowledge source files."""
+
+    def test_builtin_sources_at_least_5(self):
+        from cyber_sentry.knowledge import KnowledgeBase
+        kb = KnowledgeBase()
+        assert len(kb.list_sources()) >= 5
+
+    def test_osint_source_loaded(self):
+        from cyber_sentry.knowledge import KnowledgeBase
+        kb = KnowledgeBase()
+        assert "osint_bugbounty_methodology" in kb.list_sources()
+
+    def test_cloud_source_loaded(self):
+        from cyber_sentry.knowledge import KnowledgeBase
+        kb = KnowledgeBase()
+        assert "cloud_security_methodology" in kb.list_sources()
+
+    def test_binary_source_loaded(self):
+        from cyber_sentry.knowledge import KnowledgeBase
+        kb = KnowledgeBase()
+        assert "binary_forensics_methodology" in kb.list_sources()
+
+    def test_osint_context_contains_amass(self):
+        from cyber_sentry.knowledge import KnowledgeBase
+        kb = KnowledgeBase()
+        ctx = kb.get_context("osint subdomain")
+        assert "amass" in ctx.lower()
+
+    def test_cloud_context_contains_aws(self):
+        from cyber_sentry.knowledge import KnowledgeBase
+        kb = KnowledgeBase()
+        ctx = kb.get_context("aws cloud")
+        assert "aws" in ctx.lower()
+
+    def test_binary_context_contains_gdb(self):
+        from cyber_sentry.knowledge import KnowledgeBase
+        kb = KnowledgeBase()
+        ctx = kb.get_context("gdb binary")
+        assert "gdb" in ctx.lower()

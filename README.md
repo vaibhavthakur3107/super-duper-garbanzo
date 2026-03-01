@@ -9,6 +9,8 @@
 [![Tests](https://img.shields.io/badge/Tests-passing-brightgreen)](tests/)
 
 📖 **[→ Complete Beginner's Setup & Usage Guide (GUIDE.md)](GUIDE.md)**
+🔍 **[→ Feature Comparison vs HexStrike AI / PentAGI (COMPARISON.md)](COMPARISON.md)**
+📋 **[→ Complete Capabilities Reference (CAPABILITIES.md)](CAPABILITIES.md)**
 
 ---
 
