@@ -1,17 +1,23 @@
 # 🛡️ Cyber-Sentry AI
 
-A production-ready autonomous Red Team Pentesting Agent built with LangGraph, Ollama (local LLM), and Streamlit.
+A production-ready autonomous Red Team Pentesting Agent built with LangGraph, Streamlit, and your choice of LLM provider.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-green)
 ![LangGraph](https://img.shields.io/badge/LangGraph-0.0.20+-blue)
 ![Ollama](https://img.shields.io/badge/Ollama-Local-orange)
+![OpenAI](https://img.shields.io/badge/OpenAI-API-412991)
+![Anthropic](https://img.shields.io/badge/Anthropic-Claude-blueviolet)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-200%2B_Models-ff6b35)
 ![Streamlit](https://img.shields.io/badge/Streamlit-UI-red)
 
 ## 🎯 Overview
 
 Cyber-Sentry is a multi-agent pentesting system that uses:
 - **LangGraph** for agent orchestration with state machine architecture
-- **Ollama** (Llama3/Mistral) for local LLM inference
+- **Ollama** (Llama3/Mistral) for local LLM inference, **or** cloud providers:
+  - **OpenAI** (GPT-4o, GPT-4-turbo, …)
+  - **Anthropic** (Claude 3 Haiku/Sonnet/Opus)
+  - **OpenRouter** (200+ models — GPT-4o, Claude, Llama 3, Mistral, Gemini, DeepSeek, …)
 - **Streamlit** for interactive Thought Trace visualization
 - **SQLite** for conversation memory storage
 
@@ -146,19 +152,73 @@ python main.py
 ### Environment Variables
 
 ```bash
+# ── LLM Provider ──────────────────────────────────────────────────────────────
+# Choose one: ollama | openai | anthropic | openrouter
+# If not set, auto-detected from available API keys (openrouter > openai > anthropic > ollama)
+export LLM_PROVIDER="ollama"
+
+# Ollama (local) – default
+export OLLAMA_BASE_URL="http://localhost:11434"   # optional, default shown
+export DEFAULT_MODEL="llama3"
+
+# OpenAI
+export OPENAI_API_KEY="sk-..."
+
+# Anthropic
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# OpenRouter  (gives access to 200+ models from OpenAI, Anthropic, Meta, Mistral, …)
+# Get your key at https://openrouter.ai/keys
+export OPENROUTER_API_KEY="sk-or-..."
+export OPENROUTER_SITE_URL="https://yoursite.com"   # optional, shown in OR dashboard
+export OPENROUTER_APP_TITLE="Cyber-Sentry AI"       # optional, shown in OR dashboard
+
 # Set authorized scopes (comma-separated)
 export AUTHORIZED_SCOPES="example.com,test.local,127.0.0.1,localhost"
-
-# Ollama URL (if remote)
-export OLLAMA_BASE_URL="http://localhost:11434"
-
-# Model selection
-export DEFAULT_MODEL="llama3"
 ```
 
 ### Authorized Scopes
 
 Edit `guardrails/scope_validator.py` or use the sidebar in the UI to configure allowed targets.
+
+## 🔌 LLM Providers
+
+Cyber-Sentry supports four LLM backends. The active provider is chosen automatically from
+available API keys, or you can set `LLM_PROVIDER` explicitly.
+
+| Provider | Env Variable | Default Model | Notes |
+|---|---|---|---|
+| **Ollama** (default) | `OLLAMA_BASE_URL` | `llama3` | 100 % local, no API key needed |
+| **OpenAI** | `OPENAI_API_KEY` | `gpt-4o-mini` | Requires `pip install langchain-openai` |
+| **Anthropic** | `ANTHROPIC_API_KEY` | `claude-3-haiku-20240307` | Requires `pip install langchain-anthropic` |
+| **OpenRouter** | `OPENROUTER_API_KEY` | `openai/gpt-4o-mini` | 200+ models; requires `pip install langchain-openai` |
+
+### Using OpenRouter
+
+[OpenRouter](https://openrouter.ai) is a unified API that gives access to models from OpenAI,
+Anthropic, Meta (Llama), Mistral, Google (Gemini), DeepSeek, and many more – all through a
+single API key.
+
+```bash
+# 1. Get a free key at https://openrouter.ai/keys
+export OPENROUTER_API_KEY="sk-or-..."
+
+# 2. Install the required package (same as for OpenAI)
+pip install langchain-openai
+
+# 3. Run Cyber-Sentry – it will auto-detect OpenRouter
+streamlit run app.py
+
+# Or set the provider and model explicitly
+export LLM_PROVIDER="openrouter"
+# In the UI: select "openrouter" provider and choose any model from the dropdown
+```
+
+Popular free or low-cost OpenRouter models for pentesting tasks:
+- `meta-llama/llama-3.1-8b-instruct:free` – fast, free tier
+- `mistralai/mistral-7b-instruct:free` – fast, free tier
+- `openai/gpt-4o-mini` – cost-effective, strong reasoning
+- `deepseek/deepseek-chat` – excellent code/technical tasks
 
 ## 🛡️ Security Features
 

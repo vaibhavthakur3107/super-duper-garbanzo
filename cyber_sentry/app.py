@@ -122,7 +122,7 @@ st.markdown("""
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import run_pentest, get_llm
+from main import run_pentest, get_llm, PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
 
 
 # ============================================================================
@@ -147,9 +147,9 @@ def generate_session_id():
     return f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
 
 
-async def run_agent_async(target: str, task: str, model: str):
+async def run_agent_async(target: str, task: str, model: str, provider: str):
     """Run the agent asynchronously"""
-    result = await run_pentest(target, task, model)
+    result = await run_pentest(target, task, model, provider)
     return result
 
 
@@ -239,13 +239,48 @@ def render_sidebar():
         
         st.divider()
         
-        # Model selection
-        st.subheader("Model Settings")
-        model = st.selectbox(
-            "LLM Model",
-            ["llama3", "mistral", "codellama", "neural-chat"],
+        # Provider selection
+        st.subheader("LLM Provider")
+        provider = st.selectbox(
+            "Provider",
+            [PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER],
             index=0,
-            help="Select the Ollama model to use"
+            help="Select the LLM provider. Set the corresponding API key via environment variable."
+        )
+
+        # Model selection per provider
+        st.subheader("Model Settings")
+        if provider == PROVIDER_OLLAMA:
+            model_options = ["llama3", "mistral", "codellama", "neural-chat"]
+            default_idx = 0
+        elif provider == PROVIDER_OPENAI:
+            model_options = ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
+            default_idx = 0
+        elif provider == PROVIDER_OPENROUTER:
+            model_options = [
+                "openai/gpt-4o-mini",
+                "openai/gpt-4o",
+                "anthropic/claude-3-haiku",
+                "anthropic/claude-3.5-sonnet",
+                "meta-llama/llama-3.1-8b-instruct:free",
+                "mistralai/mistral-7b-instruct:free",
+                "google/gemini-flash-1.5",
+                "deepseek/deepseek-chat",
+            ]
+            default_idx = 0
+        else:  # anthropic
+            model_options = [
+                "claude-3-haiku-20240307",
+                "claude-3-5-sonnet-20241022",
+                "claude-3-opus-20240229",
+            ]
+            default_idx = 0
+
+        model = st.selectbox(
+            "Model",
+            model_options,
+            index=default_idx,
+            help="Select the model to use for the chosen provider"
         )
         
         st.divider()
@@ -274,10 +309,10 @@ def render_sidebar():
         **Cyber-Sentry AI** v1.0.0
         
         Red Team Pentesting Agent
-        Built with LangGraph + Ollama
+        Built with LangGraph + Ollama/OpenAI/Anthropic/OpenRouter
         """)
         
-        return model, scopes
+        return model, provider, scopes
 
 
 # ============================================================================
@@ -287,7 +322,7 @@ def render_sidebar():
 def main():
     """Main application"""
     
-    model, scopes = render_sidebar()
+    model, provider, scopes = render_sidebar()
     
     # Main content area
     st.title("🛡️ Cyber-Sentry AI")
@@ -344,7 +379,7 @@ def main():
                 
                 # Run agent
                 try:
-                    result = asyncio.run(run_agent_async(target, task, model))
+                    result = asyncio.run(run_agent_async(target, task, model, provider))
                     
                     # Update thought trace
                     st.session_state.thought_trace = result.get("thought_trace", [])
@@ -473,6 +508,42 @@ def main():
                     observation = thought.get("observation", "")
                     if observation:
                         st.text(observation[:500] + "..." if len(observation) > 500 else observation)
+        
+        # ── Report Export ──────────────────────────────────────────────────────
+        st.divider()
+        st.subheader("📄 Export Report")
+        
+        if st.button("📥 Generate Markdown Report"):
+            report_lines = [
+                "# Cyber-Sentry AI – Penetration Test Report",
+                "",
+                f"**Session:** {st.session_state.current_session or 'N/A'}",
+                f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                "",
+                "---",
+                "",
+                "## Thought Trace",
+                "",
+            ]
+            for t in st.session_state.thought_trace:
+                report_lines.append(f"### [{t.get('node', '').upper()}] {t.get('action', '')}")
+                if t.get("thought"):
+                    report_lines.append(f"**Thought:** {t['thought']}")
+                if t.get("reasoning"):
+                    report_lines.append(f"**Reasoning:** {t['reasoning']}")
+                if t.get("observation"):
+                    report_lines.append(f"**Observation:**\n```\n{t['observation']}\n```")
+                report_lines.append("")
+            
+            report_md = "\n".join(report_lines)
+            st.download_button(
+                label="⬇️ Download report.md",
+                data=report_md,
+                file_name="cyber_sentry_report.md",
+                mime="text/markdown",
+            )
+            with st.expander("Preview Report"):
+                st.markdown(report_md)
 
 
 if __name__ == "__main__":
