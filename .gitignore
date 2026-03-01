@@ -52,3 +52,11 @@ cyber_sentry/ui/dist/
 cyber_sentry/ui/.vite/
 *.log
 *.db
+
+# Environment variables – never commit secrets
+.env
+
+# Loot / session output
+loot/*.json
+loot/*.md
+sessions/

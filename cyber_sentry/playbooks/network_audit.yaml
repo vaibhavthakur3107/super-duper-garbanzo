@@ -1,0 +1,71 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: Network / Infrastructure Audit
+# ──────────────────────────────────────────────────────────────────────────────
+name: network_audit
+description: >
+  Black-box network infrastructure audit.
+  Covers host discovery, port scanning, service enumeration,
+  and network-level vulnerability assessment.
+version: "1.0"
+category: network
+
+phases:
+  - name: host_discovery
+    description: Identify live hosts on the network
+    tools:
+      - nmap_scan
+    steps:
+      - "Run: nmap -sn {target}/24 (ping sweep)"
+      - "Identify all live hosts"
+
+  - name: port_scan
+    description: Full TCP/UDP port scan of target hosts
+    tools:
+      - nmap_scan
+    steps:
+      - "Run: nmap -sS -sU -sV -sC -T4 -p- {target}"
+      - "Identify all open TCP and UDP ports"
+      - "Fingerprint service versions"
+
+  - name: service_enumeration
+    description: Deep enumeration of discovered services
+    tools:
+      - nmap_scan
+      - dig_lookup
+      - whois_lookup
+    steps:
+      - "Banner grabbing on all open services"
+      - "Check for anonymous access (FTP, SMB, LDAP)"
+      - "DNS zone transfer attempt"
+      - "SNMP community string enumeration"
+
+  - name: vulnerability_assessment
+    description: Identify network-level vulnerabilities
+    tools:
+      - nuclei_scan
+      - nmap_scan
+    steps:
+      - "Run nmap NSE vulnerability scripts: --script vuln"
+      - "Run nuclei with network templates"
+      - "Check for unpatched/outdated service versions"
+
+  - name: ssl_tls_audit
+    description: Audit SSL/TLS configuration
+    tools:
+      - nmap_scan
+    steps:
+      - "Run: nmap --script ssl-enum-ciphers -p 443,8443 {target}"
+      - "Check for weak ciphers, expired certificates, POODLE/BEAST/CRIME"
+
+success_criteria:
+  - "Complete host and port inventory"
+  - "Service version fingerprinting"
+  - "Network vulnerability list with severity"
+  - "SSL/TLS configuration assessment"
+
+report_sections:
+  - executive_summary
+  - network_topology
+  - open_ports_and_services
+  - vulnerabilities
+  - remediation

@@ -4,11 +4,14 @@ A production-ready autonomous Red Team Pentesting Agent built with LangGraph, St
 
 ![Python](https://img.shields.io/badge/Python-3.10+-green)
 ![LangGraph](https://img.shields.io/badge/LangGraph-0.0.20+-blue)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
 ![Ollama](https://img.shields.io/badge/Ollama-Local-orange)
 ![OpenAI](https://img.shields.io/badge/OpenAI-API-412991)
 ![Anthropic](https://img.shields.io/badge/Anthropic-Claude-blueviolet)
 ![OpenRouter](https://img.shields.io/badge/OpenRouter-200%2B_Models-ff6b35)
 ![Streamlit](https://img.shields.io/badge/Streamlit-UI-red)
+![Tests](https://img.shields.io/badge/Tests-37_passing-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## 🎯 Overview
 
@@ -20,92 +23,171 @@ Cyber-Sentry is a multi-agent pentesting system that uses:
   - **OpenRouter** (200+ models — GPT-4o, Claude, Llama 3, Mistral, Gemini, DeepSeek, …)
 - **Streamlit** for interactive Thought Trace visualization
 - **SQLite** for conversation memory storage
+- **Docker** for isolated, reproducible execution with security tools pre-installed
+- **Playbooks** for structured, repeatable attack scenarios
+- **Notes/Loot** system to persist findings across sessions
 
 ## 📂 Project Structure
 
 ```
 cyber_sentry/
 ├── main.py                    # LangGraph state machine
+├── providers.py               # LLM provider constants & factory (no heavy deps)
+├── cli.py                     # Interactive CLI entry point
+├── notes.py                   # Notes / loot saving system
 ├── app.py                     # Streamlit frontend
 ├── requirements.txt           # Python dependencies
-├── agents/                    # Agent implementations (legacy)
+├── playbooks/
+│   ├── web_pentest.yaml       # Full web application pentest
+│   ├── network_audit.yaml     # Network infrastructure audit
+│   ├── recon.yaml             # Reconnaissance only
+│   └── ctf.yaml               # CTF challenge solver
+├── agents/                    # Agent implementations
 ├── tools/
-│   ├── network_tools.py      # Nmap, Nikto, Gobuster wrappers
-│   └── registry.py           # Tool registry
+│   ├── network_tools.py       # Nmap, Nikto, Gobuster wrappers
+│   └── registry.py            # Tool registry
 ├── guardrails/
-│   ├── security.py           # Security guardrails
-│   └── scope_validator.py    # Target scope validation
+│   ├── security.py            # Security guardrails
+│   └── scope_validator.py     # Target scope validation
 ├── prompts/
-│   └── system_prompt.py      # LLM prompts
+│   └── system_prompt.py       # LLM prompts
 ├── db/
-│   └── memory.py             # SQLite conversation memory
-└── api/                      # REST API (optional)
+│   └── memory.py              # SQLite conversation memory
+└── api/                       # REST API (FastAPI)
+
+# Root-level infrastructure
+Dockerfile                     # Multi-stage Docker build
+docker-compose.yml             # Docker Compose (UI + API + Ollama + CLI)
+Makefile                       # Quick commands: make run, make docker-up, make test
+.env.example                   # All environment variables documented
+tests/
+└── test_core.py               # 37-test suite (no LLM required)
 ```
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-1. **Python 3.10+**
-2. **Ollama** installed and running locally
-3. **Security tools** (optional): nmap, nikto, gobuster, nuclei
-
-### Installation
+### Option A – Docker (Recommended, like PentestGPT)
 
 ```bash
-# Clone and navigate to project
-cd cyber_sentry
+# 1. Clone
+git clone https://github.com/vaibhavthakur3107/super-duper-garbanzo.git
+cd super-duper-garbanzo
 
-# Create virtual environment (recommended)
+# 2. Configure
+cp .env.example .env
+# Edit .env with your API key(s)
+
+# 3. Start (includes Ollama + Streamlit UI + security tools)
+docker compose up
+
+# Open http://localhost:8501
+```
+
+### Option B – Local Python
+
+```bash
+# 1. Setup
+make setup          # installs deps + creates .env from example
+
+# 2. (Optional) pull Ollama model
+make pull-ollama
+
+# 3. Start Streamlit UI
+make run            # → http://localhost:8501
+
+# Or start interactive CLI
+make run-cli
+```
+
+### Option C – Manual
+
+```bash
+cd super-duper-garbanzo
+
 python3 -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or: venv\Scripts\activate  # Windows
+source venv/bin/activate
 
-# Install dependencies
-pip install -r requirements.txt
+pip install -r cyber_sentry/requirements.txt
+# Optional cloud providers:
+pip install langchain-openai      # for OpenAI or OpenRouter
+pip install langchain-anthropic   # for Anthropic
+
+cp .env.example .env   # then edit with your keys
+streamlit run cyber_sentry/app.py
 ```
 
-### Install Ollama
+## 🖥️ CLI Usage
+
+Cyber-Sentry ships a `cyber-sentry` interactive CLI similar to PentestAgent:
 
 ```bash
-# macOS
-brew install ollama
+# Interactive REPL (default)
+python -m cyber_sentry.cli
 
-# Linux
-curl -fsSL https://ollama.com/install.sh | sh
+# With target preset
+python -m cyber_sentry.cli -t 192.168.1.1
 
-# Start Ollama
-ollama serve
+# One-shot non-interactive run
+python -m cyber_sentry.cli run -t example.com --playbook web_pentest --report
 
-# Pull a model
-ollama pull llama3
+# List available playbooks
+python -m cyber_sentry.cli playbooks
+
+# Show saved notes/loot
+python -m cyber_sentry.cli notes
 ```
 
-### Install Security Tools (Optional)
+### CLI Commands (interactive mode)
+
+```
+/agent <task>       Run autonomous agent on a task
+/target <host>      Set target
+/playbook <name>    Load and run a playbook
+/notes              Show saved notes / loot
+/report             Generate Markdown report for current session
+/playbooks          List available playbooks
+/tools              List available tools
+/clear              Clear current session
+/quit               Exit  (also /exit, /q)
+/help               Show this help  (also /h, /?)
+```
+
+## 📋 Playbooks
+
+Prebuilt attack playbooks for structured, repeatable assessments (like PentestAgent):
+
+| Playbook | Category | Description |
+|---|---|---|
+| `web_pentest` | Web | Full black-box web application pentest |
+| `network_audit` | Network | Infrastructure audit with port scanning and SSL review |
+| `recon` | Reconnaissance | Passive OSINT + active enumeration, no exploitation |
+| `ctf` | CTF | Capture The Flag challenge solver (Web, Forensics, Crypto) |
 
 ```bash
-# Ubuntu/Debian
-sudo apt-get install nmap nikto
-
-# Or use Docker for isolated execution
+# Run a playbook
+python -m cyber_sentry.cli run -t example.com --playbook web_pentest --report
 ```
 
-## 🎮 Running the Application
-
-### Start Streamlit UI
+## 🐳 Docker
 
 ```bash
-cd cyber_sentry
-streamlit run app.py
+# Build
+make docker-build
+
+# Start all services (UI + API + Ollama)
+make docker-up
+
+# Run CLI in container
+make docker-cli
+
+# Individual services
+docker compose up ui          # Streamlit UI → http://localhost:8501
+docker compose up api         # FastAPI → http://localhost:8000
+docker compose run --rm cli   # Interactive CLI
 ```
 
-Open http://localhost:8501 in your browser.
+The Docker image pre-installs **nmap, nikto, whois, dig, curl, wget, netcat**.
 
-### CLI Usage
-
-```bash
-python main.py
-```
 
 ## 🧠 Architecture
 
@@ -267,11 +349,10 @@ Popular free or low-cost OpenRouter models for pentesting tasks:
 ### Running Tests
 
 ```bash
-# Test scope validation
-python -c "from guardrails.scope_validator import validate_scope; print(validate_scope('example.com'))"
-
-# Test tool execution
-python -c "from tools.network_tools import nmap_scan; print(nmap_scan('nmap -sV localhost', 'localhost'))"
+# Full test suite (37 tests, no LLM required)
+make test
+# or:
+python -m pytest tests/ -v
 ```
 
 ### Adding New Tools
@@ -280,13 +361,35 @@ python -c "from tools.network_tools import nmap_scan; print(nmap_scan('nmap -sV 
 2. Register in `ToolRegistry`
 3. Update prompts in `prompts/system_prompt.py`
 
+### Adding New Playbooks
+
+1. Create `cyber_sentry/playbooks/<name>.yaml` following the existing format
+2. The playbook is immediately available via `/playbook <name>` in the CLI and `--playbook <name>` flag
+
+## 📊 Comparison with Similar Projects
+
+| Feature | Cyber-Sentry | PentestGPT | PentestAgent | Pentagi |
+|---|:---:|:---:|:---:|:---:|
+| Multi-LLM (Ollama/OpenAI/Anthropic/OpenRouter) | ✅ | ✅ | ✅ | ✅ |
+| Docker-first deployment | ✅ | ✅ | ✅ | ✅ |
+| Interactive CLI | ✅ | ✅ | ✅ | ✅ |
+| Attack playbooks | ✅ | ❌ | ✅ | ❌ |
+| Notes / loot saving | ✅ | ❌ | ✅ | ✅ |
+| Markdown report export | ✅ | ❌ | ✅ | ✅ |
+| Streamlit web UI | ✅ | ❌ | ❌ | ✅ |
+| FastAPI REST backend | ✅ | ❌ | ❌ | ✅ |
+| LangGraph state machine | ✅ | ❌ | ❌ | ❌ |
+| Scope validation guardrail | ✅ | ✅ | ✅ | ✅ |
+| Prompt injection protection | ✅ | ✅ | ✅ | ✅ |
+| Test suite | ✅ | ✅ | ✅ | ✅ |
+
 ## 📜 License
 
-MIT License - See LICENSE for details.
+MIT License – See [LICENSE](../LICENSE) for details.
 
 ## ⚠️ Disclaimer
 
-This tool is for educational and authorized security testing purposes only. 
+This tool is for educational and authorized security testing purposes only.
 Always ensure you have written permission before scanning any target.
 Unauthorized scanning is illegal and unethical.
 

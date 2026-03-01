@@ -122,7 +122,8 @@ st.markdown("""
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import run_pentest, get_llm, PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
+from main import run_pentest, get_llm
+from providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
 
 
 # ============================================================================

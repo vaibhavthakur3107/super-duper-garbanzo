@@ -1,0 +1,92 @@
+version: "3.9"
+
+# ── Cyber-Sentry AI – Docker Compose ──────────────────────────────────────────
+# Usage:
+#   docker compose up            # Start Streamlit UI (http://localhost:8501)
+#   docker compose up api        # Start FastAPI backend (http://localhost:8000)
+#   docker compose run --rm cli  # Run CLI agent interactively
+
+services:
+  # ── Streamlit web UI ────────────────────────────────────────────────────────
+  ui:
+    build: .
+    image: cyber-sentry:latest
+    ports:
+      - "8501:8501"
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENROUTER_SITE_URL=${OPENROUTER_SITE_URL:-}
+      - OPENROUTER_APP_TITLE=${OPENROUTER_APP_TITLE:-Cyber-Sentry AI}
+      - AUTHORIZED_SCOPES=${AUTHORIZED_SCOPES:-example.com,test.local,127.0.0.1,localhost}
+    volumes:
+      - ./loot:/app/loot
+      - ./sessions:/app/sessions
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    command: >
+      streamlit run cyber_sentry/app.py
+      --server.address=0.0.0.0
+      --server.port=8501
+      --server.headless=true
+
+  # ── FastAPI REST backend ─────────────────────────────────────────────────────
+  api:
+    build: .
+    image: cyber-sentry:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - AUTHORIZED_SCOPES=${AUTHORIZED_SCOPES:-example.com,test.local,127.0.0.1,localhost}
+    volumes:
+      - ./loot:/app/loot
+      - ./sessions:/app/sessions
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    command: >
+      uvicorn cyber_sentry.api.main:app
+      --host 0.0.0.0 --port 8000 --reload
+
+  # ── One-shot CLI container ────────────────────────────────────────────────────
+  cli:
+    build: .
+    image: cyber-sentry:latest
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - AUTHORIZED_SCOPES=${AUTHORIZED_SCOPES:-example.com,test.local,127.0.0.1,localhost}
+    volumes:
+      - ./loot:/app/loot
+      - ./sessions:/app/sessions
+    depends_on:
+      - ollama
+    profiles:
+      - cli
+    stdin_open: true
+    tty: true
+    command: python -m cyber_sentry.cli
+
+  # ── Local Ollama (optional, used when LLM_PROVIDER=ollama) ───────────────────
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
