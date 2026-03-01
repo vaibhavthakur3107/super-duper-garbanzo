@@ -1,211 +1,224 @@
-# 🔒 Cyber-Sentry AI
+# 🛡️ Cyber-Sentry AI
 
-A production-ready Red Team Cyber-Sentry AI agent system with multi-agent architecture, ReAct reasoning, tool integration, security guardrails, and an interactive Thought Trace UI.
+A production-ready autonomous Red Team Pentesting Agent built with LangGraph, Ollama (local LLM), and Streamlit.
 
-![Cyber-Sentry AI](https://img.shields.io/badge/Version-1.0.0-blue)
 ![Python](https://img.shields.io/badge/Python-3.10+-green)
-![React](https://img.shields.io/badge/React-18.2-blue)
+![LangGraph](https://img.shields.io/badge/LangGraph-0.0.20+-blue)
+![Ollama](https://img.shields.io/badge/Ollama-Local-orange)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-red)
 
-## 🎯 Features
+## 🎯 Overview
 
-### Multi-Agent Architecture
-- **Reconnaissance Agent**: Performs OSINT and network reconnaissance
-- **Vulnerability Agent**: Analyzes systems for security vulnerabilities
-- **Exploitation Agent**: Validates potential exploits safely
-- **Reporting Agent**: Generates comprehensive assessment reports
+Cyber-Sentry is a multi-agent pentesting system that uses:
+- **LangGraph** for agent orchestration with state machine architecture
+- **Ollama** (Llama3/Mistral) for local LLM inference
+- **Streamlit** for interactive Thought Trace visualization
+- **SQLite** for conversation memory storage
 
-### ReAct Reasoning
-- Implements Reasoning + Acting paradigm
-- Full thought trace visualization
-- Step-by-step decision tracking
-
-### Tool Integrations
-- Network scanning and reconnaissance
-- Vulnerability assessment
-- SSL/TLS analysis
-- WHOIS lookups
-- Extensible tool registry
-
-### Security Guardrails
-- Scope validation (prevent unauthorized targets)
-- Dangerous action blocking
-- Rate limiting
-- Input validation & sanitization
-- Legal compliance checks
-- Audit logging
-- Output filtering (PII redaction)
-
-### Thought Trace UI
-- Real-time thought visualization
-- Agent state monitoring
-- Task execution interface
-- System status dashboard
-
-## 🏗️ Architecture
+## 📂 Project Structure
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Cyber-Sentry AI                         │
-├─────────────────────────────────────────────────────────────┤
-│                      API Layer (FastAPI)                    │
-├──────────────┬──────────────┬──────────────┬───────────────┤
-│   Recon      │  Vulnerability│  Exploitation│   Reporting  │
-│   Agent      │    Agent      │    Agent     │    Agent     │
-├──────────────┴──────────────┴──────────────┴───────────────┤
-│                  ReAct Reasoning Engine                     │
-├─────────────────────────────────────────────────────────────┤
-│  Tool Registry  │  Security Guardrails  │  Memory Storage  │
-└─────────────────────────────────────────────────────────────┘
+cyber_sentry/
+├── main.py                    # LangGraph state machine
+├── app.py                     # Streamlit frontend
+├── requirements.txt           # Python dependencies
+├── agents/                    # Agent implementations (legacy)
+├── tools/
+│   ├── network_tools.py      # Nmap, Nikto, Gobuster wrappers
+│   └── registry.py           # Tool registry
+├── guardrails/
+│   ├── security.py           # Security guardrails
+│   └── scope_validator.py    # Target scope validation
+├── prompts/
+│   └── system_prompt.py      # LLM prompts
+├── db/
+│   └── memory.py             # SQLite conversation memory
+└── api/                      # REST API (optional)
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- npm or yarn
+
+1. **Python 3.10+**
+2. **Ollama** installed and running locally
+3. **Security tools** (optional): nmap, nikto, gobuster, nuclei
 
 ### Installation
 
-1. **Clone and install Python dependencies:**
 ```bash
+# Clone and navigate to project
 cd cyber_sentry
+
+# Create virtual environment (recommended)
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or: venv\Scripts\activate  # Windows
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-2. **Install frontend dependencies:**
+### Install Ollama
+
 ```bash
-cd ui
-npm install
+# macOS
+brew install ollama
+
+# Linux
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Start Ollama
+ollama serve
+
+# Pull a model
+ollama pull llama3
 ```
 
-### Running the Application
+### Install Security Tools (Optional)
 
-1. **Start the backend API:**
+```bash
+# Ubuntu/Debian
+sudo apt-get install nmap nikto
+
+# Or use Docker for isolated execution
+```
+
+## 🎮 Running the Application
+
+### Start Streamlit UI
+
 ```bash
 cd cyber_sentry
-uvicorn api.main:app --reload --port 8000
+streamlit run app.py
 ```
 
-2. **Start the frontend (in another terminal):**
+Open http://localhost:8501 in your browser.
+
+### CLI Usage
+
 ```bash
-cd cyber_sentry/ui
-npm run dev
+python main.py
 ```
 
-3. **Access the UI:**
-Open http://localhost:3000 in your browser
+## 🧠 Architecture
 
-## 📡 API Endpoints
+### LangGraph State Machine
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Root endpoint |
-| `/status` | GET | System status |
-| `/health` | GET | Health check |
-| `/tasks` | POST | Execute a task |
-| `/tasks/{session_id}` | GET | Get task results |
-| `/agents` | GET | List agents |
-| `/agents/{name}/thoughts` | GET | Get agent thoughts |
-| `/tools` | GET | List available tools |
-| `/guardrails` | GET | List security guardrails |
-| `/ws/thoughts` | WebSocket | Real-time thought stream |
+```
+┌─────────────┐
+│  Supervisor │ ──► Creates attack plan
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  Guardrail  │ ──► Validates scope & input
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Planner   │ ──► Generates commands
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│    Tool     │ ──► Executes security tools
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  Reflection │ ──► Analyzes results, plans next step
+└──────┬──────┘
+       │
+       ▼ (loop until complete)
+```
+
+### Nodes
+
+1. **Supervisor Node**: Analyzes target, creates attack plan
+2. **Guardrail Node**: Validates target scope, prevents unauthorized access
+3. **Planner Node**: Generates appropriate commands dynamically
+4. **Tool Node**: Executes nmap, nikto, gobuster, etc.
+5. **Reflection Node**: Analyzes output, decides next action
 
 ## 🔧 Configuration
 
-### Allowed Domains
-Configure allowed target domains in `cyber_sentry/api/main.py`:
+### Environment Variables
 
-```python
-guardrails = SecurityGuardrails(allowed_domains=["example.com", "test.local"])
+```bash
+# Set authorized scopes (comma-separated)
+export AUTHORIZED_SCOPES="example.com,test.local,127.0.0.1,localhost"
+
+# Ollama URL (if remote)
+export OLLAMA_BASE_URL="http://localhost:11434"
+
+# Model selection
+export DEFAULT_MODEL="llama3"
 ```
 
-### Rate Limiting
-Adjust rate limits in `cyber_sentry/guardrails/security.py`:
+### Authorized Scopes
 
-```python
-RateLimitGuardrail(max_requests_per_minute=60)
-```
-
-## 📁 Project Structure
-
-```
-cyber_sentry/
-├── agents/               # Agent implementations
-│   ├── __init__.py       # Base agent classes
-│   └── specialized.py    # Specialized agent implementations
-├── tools/                # Tool integrations
-│   └── registry.py       # Tool registry
-├── guardrails/           # Security guardrails
-│   └── security.py       # Security checks
-├── api/                  # FastAPI backend
-│   └── main.py           # API endpoints
-├── ui/                   # React frontend
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── App.tsx       # Main app
-│   │   └── index.css     # Styles
-│   └── package.json
-└── requirements.txt      # Python dependencies
-```
+Edit `guardrails/scope_validator.py` or use the sidebar in the UI to configure allowed targets.
 
 ## 🛡️ Security Features
 
-1. **Scope Validation**: Prevents scanning of unauthorized targets
-2. **Dangerous Action Blocking**: Blocks harmful operations
-3. **Rate Limiting**: Prevents abuse
-4. **Input Validation**: Sanitizes user inputs
-5. **Legal Compliance**: Blocks government/critical infrastructure
-6. **Audit Logging**: Records all operations
-7. **Output Filtering**: Redacts sensitive data
+1. **Scope Validation**: Prevents scanning unauthorized targets
+2. **Input Sanitization**: Blocks prompt injection attempts
+3. **Command Validation**: Sanitizes shell commands
+4. **Rate Limiting**: Prevents abuse
+5. **Audit Logging**: Records all operations
 
-## 🤖 ReAct Reasoning
+## 🤖 Features
 
-The system implements the ReAct (Reasoning + Acting) paradigm:
+### Thought Trace UI
 
-1. **Think**: Agent analyzes the task and context
-2. **Act**: Agent selects and executes a tool action
-3. **Observe**: Agent processes the result
-4. **Iterate**: Agent continues until task completion
+- Real-time visualization of agent reasoning
+- Shows each step: Think → Act → Observe
+- Filter by node type
+- Expandable details
 
-Each step is logged and visualized in the Thought Trace UI.
+### Multi-Agent Architecture
 
-## 📝 Example Usage
+- Specialized agents for different phases
+- Dynamic command generation
+- Self-correction via reflection
 
-### Execute a Task via API
+### Tool Integration
 
-```bash
-curl -X POST http://localhost:8000/tasks \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task": "Perform reconnaissance",
-    "target": "example.com"
-  }'
-```
+- **nmap**: Port scanning
+- **nikto**: Web vulnerability scanning
+- **gobuster**: Directory enumeration
+- **nuclei**: Vulnerability scanning
+- **sqlmap**: SQL injection testing
+- **whois**: Domain information
+- **dig**: DNS lookup
 
-### Expected Response
+## 📝 Usage Example
 
-```json
-{
-  "session_id": "uuid",
-  "status": "completed",
-  "task": "Perform reconnaissance Target: example.com",
-  "start_time": "2024-01-01T00:00:00",
-  "results": [...]
-}
-```
+1. Open Streamlit UI at http://localhost:8501
+2. Enter target (e.g., `example.com`)
+3. Select task type or use default
+4. Click "Execute Assessment"
+5. Watch the Thought Trace for real-time reasoning
+6. Review findings in tool results
 
 ## 🔨 Development
 
 ### Running Tests
+
 ```bash
-pytest
+# Test scope validation
+python -c "from guardrails.scope_validator import validate_scope; print(validate_scope('example.com'))"
+
+# Test tool execution
+python -c "from tools.network_tools import nmap_scan; print(nmap_scan('nmap -sV localhost', 'localhost'))"
 ```
 
-### Linting
-```bash
-flake8 cyber_sentry/
-```
+### Adding New Tools
+
+1. Add tool function to `tools/network_tools.py`
+2. Register in `ToolRegistry`
+3. Update prompts in `prompts/system_prompt.py`
 
 ## 📜 License
 
@@ -214,4 +227,15 @@ MIT License - See LICENSE for details.
 ## ⚠️ Disclaimer
 
 This tool is for educational and authorized security testing purposes only. 
-Always ensure you have proper authorization before scanning any target.
+Always ensure you have written permission before scanning any target.
+Unauthorized scanning is illegal and unethical.
+
+## 🙏 Acknowledgments
+
+Inspired by:
+- [PentestGPT](https://github.com/GreyDGL/PentestGPT)
+- [Pentagi](https://github.com/vxcontrol/pentagi)
+- [Shannon](https://github.com/KeygraphHQ/shannon)
+- [Pentest MCP Server](https://github.com/exjskdjsdfks/pentest-mcp-server)
+- [PentestAgent](https://github.com/GH05TCREW/pentestagent)
+- [HexStrike](https://github.com/CommonHuman-Lab/hexstrike-ai-community-edition)
