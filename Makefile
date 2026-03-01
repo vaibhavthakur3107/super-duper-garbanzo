@@ -1,4 +1,4 @@
-.PHONY: help install install-openai install-anthropic run run-api run-cli docker-build docker-up docker-down test lint
+.PHONY: help install install-openai install-anthropic run run-cli docker-build docker-up docker-down test lint
 
 PYTHON  ?= python3
 PIP     ?= pip3
@@ -23,15 +23,12 @@ install-all: install install-openai install-anthropic  ## Install everything
 setup: install  ## Create .env from example and install deps
 	@[ -f .env ] || cp .env.example .env && echo "Created .env – edit it with your API keys"
 
-# ── Run ────────────────────────────────────────────────────────────────────────
-run:  ## Start Streamlit UI (http://localhost:8501)
-	cd dexter_ai && streamlit run app.py
-
-run-api:  ## Start FastAPI backend (http://localhost:8000)
-	uvicorn dexter_ai.api.main:app --reload --host 0.0.0.0 --port 8000
-
-run-cli:  ## Start interactive CLI agent
+# ── Run (local, no Docker needed) ─────────────────────────────────────────────
+run-cli:  ## Start interactive CLI agent  ← main entry point
 	$(PYTHON) -m dexter_ai.cli
+
+run:  ## Start Streamlit web UI (http://localhost:8501)
+	cd dexter_ai && streamlit run app.py
 
 run-mcp:  ## Start MCP server (for Claude Desktop / Cursor / VS Code Copilot)
 	$(PYTHON) dexter_ai_mcp.py
@@ -39,18 +36,23 @@ run-mcp:  ## Start MCP server (for Claude Desktop / Cursor / VS Code Copilot)
 run-mcp-compact:  ## Start MCP server in compact mode (minimal tools)
 	$(PYTHON) dexter_ai_mcp.py --compact
 
-# ── Docker ─────────────────────────────────────────────────────────────────────
+# ── Docker (same code, containerised) ─────────────────────────────────────────
+# Docker and the CLI are ONE thing — Docker just packages it.
+# The default command inside the container is the interactive CLI.
+# Override the command to run the web UI instead:
+#   docker compose run --rm dexter-ai streamlit run dexter_ai/app.py ...
 docker-build:  ## Build Docker image
 	docker compose build
 
-docker-up:  ## Start all services with Docker Compose
-	docker compose up
+docker-run:  ## Run interactive CLI inside Docker  ← docker equivalent of run-cli
+	docker compose run --rm dexter-ai
 
-docker-down:  ## Stop all Docker Compose services
+docker-up:  ## Start Streamlit web UI via Docker (http://localhost:8501)
+	docker compose run --rm dexter-ai \
+	  streamlit run dexter_ai/app.py --server.address=0.0.0.0 --server.port=8501 --server.headless=true
+
+docker-down:  ## Stop Docker Compose services
 	docker compose down
-
-docker-cli:  ## Run CLI in Docker container
-	docker compose run --rm cli
 
 # ── Quality ────────────────────────────────────────────────────────────────────
 test:  ## Run test suite

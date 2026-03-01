@@ -29,6 +29,19 @@ def _is_open_scope_mode() -> bool:
     return os.environ.get("SCOPE_MODE", "").strip().lower() == "open"
 
 
+# Private IP prefixes that are always considered in-scope
+_PRIVATE_RANGES = (
+    '10.',
+    '192.168.',
+    '172.16.', '172.17.', '172.18.', '172.19.',
+    '172.20.', '172.21.', '172.22.', '172.23.',
+    '172.24.', '172.25.', '172.26.', '172.27.',
+    '172.28.', '172.29.', '172.30.', '172.31.',
+    '127.',
+    'localhost',
+)
+
+
 def load_scopes_from_env() -> list[str]:
     """Load authorized scopes from environment variable"""
     env_scopes = os.environ.get("AUTHORIZED_SCOPES", "")
@@ -59,17 +72,7 @@ def _check_target_against_scopes(target: str, scopes: list[str]) -> bool:
                 return True
 
         # Private IP ranges always allowed
-        private_ranges = [
-            '10.',
-            '192.168.',
-            '172.16.', '172.17.', '172.18.', '172.19.',
-            '172.20.', '172.21.', '172.22.', '172.23.',
-            '172.24.', '172.25.', '172.26.', '172.27.',
-            '172.28.', '172.29.', '172.30.', '172.31.',
-            '127.',
-            'localhost',
-        ]
-        for private_range in private_ranges:
+        for private_range in _PRIVATE_RANGES:
             if target.startswith(private_range):
                 return True
 

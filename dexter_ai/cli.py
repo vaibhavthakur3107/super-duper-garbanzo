@@ -18,6 +18,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 # Allow running as  python -m dexter_ai.cli  from repo root
@@ -434,8 +435,8 @@ def interactive_mode(args: argparse.Namespace):
             if not session_results and not notes.get_notes():
                 print(warning("No session results to report yet."))
                 continue
-            report_content = report_generator.generate_full_report(session_results, target, notes)
-            report_path = report_generator.loot_dir / f"full_report_{__import__('datetime').datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            report_generator.generate_full_report(session_results, target, notes)
+            report_path = report_generator.loot_dir / f"full_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
             print(success(f"Detailed report saved to: {report_path}"))
             continue
 

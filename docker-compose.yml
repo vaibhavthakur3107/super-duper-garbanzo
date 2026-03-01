@@ -1,18 +1,25 @@
 version: "3.9"
 
 # ── Dexter AI Pentest – Docker Compose ──────────────────────────────────────────
-# Usage:
-#   docker compose up            # Start Streamlit UI (http://localhost:8501)
-#   docker compose up api        # Start FastAPI backend (http://localhost:8000)
-#   docker compose run --rm cli  # Run CLI agent interactively
+#
+#  Everything runs from the SAME image.  Docker and the CLI are one thing —
+#  Docker is just how you package and run it.
+#
+#  Common commands:
+#    docker compose run --rm dexter-ai                        # interactive CLI  (default)
+#    docker compose run --rm dexter-ai python -m dexter_ai.cli run -t example.com
+#    docker compose up   dexter-ai                            # Streamlit web UI on :8501
+#
+#  Switch to the web UI:
+#    Override the command:  command: streamlit run dexter_ai/app.py --server.address=0.0.0.0
 
 services:
-  # ── Streamlit web UI ────────────────────────────────────────────────────────
-  ui:
+  # ── Dexter AI (CLI + web UI — same image, different command) ─────────────────
+  dexter-ai:
     build: .
     image: dexter-ai:latest
     ports:
-      - "8501:8501"
+      - "8501:8501"   # Streamlit web UI  (used when command is overridden to streamlit)
     environment:
       - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
@@ -22,61 +29,17 @@ services:
       - OPENROUTER_SITE_URL=${OPENROUTER_SITE_URL:-}
       - OPENROUTER_APP_TITLE=${OPENROUTER_APP_TITLE:-Dexter AI Pentest}
       - AUTHORIZED_SCOPES=${AUTHORIZED_SCOPES:-example.com,test.local,127.0.0.1,localhost}
+      - SCOPE_MODE=${SCOPE_MODE:-open}
+      - LOOT_DIR=/app/loot
     volumes:
       - ./loot:/app/loot
       - ./sessions:/app/sessions
     depends_on:
       - ollama
-    restart: unless-stopped
-    command: >
-      streamlit run dexter_ai/app.py
-      --server.address=0.0.0.0
-      --server.port=8501
-      --server.headless=true
-
-  # ── FastAPI REST backend ─────────────────────────────────────────────────────
-  api:
-    build: .
-    image: dexter-ai:latest
-    ports:
-      - "8000:8000"
-    environment:
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - AUTHORIZED_SCOPES=${AUTHORIZED_SCOPES:-example.com,test.local,127.0.0.1,localhost}
-    volumes:
-      - ./loot:/app/loot
-      - ./sessions:/app/sessions
-    depends_on:
-      - ollama
-    restart: unless-stopped
-    command: >
-      uvicorn dexter_ai.api.main:app
-      --host 0.0.0.0 --port 8000 --reload
-
-  # ── One-shot CLI container ────────────────────────────────────────────────────
-  cli:
-    build: .
-    image: dexter-ai:latest
-    environment:
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - AUTHORIZED_SCOPES=${AUTHORIZED_SCOPES:-example.com,test.local,127.0.0.1,localhost}
-    volumes:
-      - ./loot:/app/loot
-      - ./sessions:/app/sessions
-    depends_on:
-      - ollama
-    profiles:
-      - cli
     stdin_open: true
     tty: true
+    # Default: interactive CLI.  Override to "streamlit run dexter_ai/app.py ..."
+    # for the web UI.
     command: python -m dexter_ai.cli
 
   # ── Local Ollama (optional, used when LLM_PROVIDER=ollama) ───────────────────
