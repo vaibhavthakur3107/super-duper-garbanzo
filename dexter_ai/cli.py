@@ -18,6 +18,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 # Allow running as  python -m dexter_ai.cli  from repo root
@@ -27,6 +28,8 @@ sys.path.insert(0, str(_REPO_ROOT))
 from dexter_ai import __version__
 from dexter_ai.providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
 from dexter_ai.notes import NotesManager
+from dexter_ai.autonomous import autonomous_engine, specialist_team
+from dexter_ai.reporting import report_generator
 
 
 # ── ANSI Color Utilities ─────────────────────────────────────────────────────
@@ -121,17 +124,19 @@ HELP_TEXT = (
     f"\n"
     f"  {colored('Agent & Execution', Colors.CYAN + Colors.BOLD)}\n"
     f"    {colored('/agent <task>', Colors.GREEN)}        Run autonomous agent on task\n"
+    f"    {colored('/auto', Colors.GREEN)}                Run fully autonomous pentest (all phases)\n"
     f"    {colored('/playbook <name>', Colors.GREEN)}     Load and run a playbook\n"
     f"    {colored('/target <host>', Colors.GREEN)}       Set target\n"
     f"\n"
     f"  {colored('Reporting & Intel', Colors.CYAN + Colors.BOLD)}\n"
     f"    {colored('/notes', Colors.GREEN)}               Show saved notes / loot\n"
-    f"    {colored('/report', Colors.GREEN)}              Generate Markdown report\n"
+    f"    {colored('/report', Colors.GREEN)}              Generate detailed Markdown report with exploitation guides\n"
     f"\n"
     f"  {colored('Discovery', Colors.CYAN + Colors.BOLD)}\n"
     f"    {colored('/playbooks', Colors.GREEN)}           List available playbooks\n"
     f"    {colored('/tools', Colors.GREEN)}               List available tools (151+)\n"
     f"    {colored('/agents', Colors.GREEN)}              List AI agents (12+)\n"
+    f"    {colored('/specialists', Colors.GREEN)}         Show specialist team status\n"
     f"\n"
     f"  {colored('System', Colors.CYAN + Colors.BOLD)}\n"
     f"    {colored('/status', Colors.GREEN)}              Show system status dashboard\n"
@@ -224,6 +229,32 @@ def _format_agents() -> str:
         lines.append(
             f"  {colored(f'{i:>2}.', Colors.MAGENTA)} {colored(name, Colors.GREEN + Colors.BOLD)}\n"
             f"      {Colors.DIM}{desc}{Colors.RESET}"
+        )
+    return "\n".join(lines)
+
+
+def _format_specialists() -> str:
+    """Render the specialist team status table."""
+    status = specialist_team.get_team_status()
+    specialists = status["specialists"]
+    team_size = status["team_size"]
+    lines = [
+        f"\n  {colored(f'SPECIALIST TEAM — {team_size} specialists', Colors.CYAN + Colors.BOLD)}",
+        "",
+    ]
+    status_colors = {
+        "idle": Colors.DIM,
+        "assigned": Colors.YELLOW,
+        "active": Colors.GREEN,
+    }
+    for s in specialists:
+        sc = status_colors.get(s["status"], Colors.WHITE)
+        caps = ", ".join(s["capabilities"])
+        s_status = s["status"].upper()
+        lines.append(
+            f"  {colored(s['name'], Colors.GREEN + Colors.BOLD)}"
+            f"  {colored(f'[{s_status}]', sc)}\n"
+            f"      {Colors.DIM}Role: {s['role']}  |  Capabilities: {caps}{Colors.RESET}"
         )
     return "\n".join(lines)
 
@@ -401,11 +432,12 @@ def interactive_mode(args: argparse.Namespace):
             continue
 
         if prompt == "/report":
-            if not session_results:
+            if not session_results and not notes.get_notes():
                 print(warning("No session results to report yet."))
                 continue
-            path = notes.generate_report(session_results, target)
-            print(success(f"Report saved to: {path}"))
+            report_generator.generate_full_report(session_results, target, notes)
+            report_path = report_generator.loot_dir / f"full_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            print(success(f"Detailed report saved to: {report_path}"))
             continue
 
         if prompt == "/playbooks":
