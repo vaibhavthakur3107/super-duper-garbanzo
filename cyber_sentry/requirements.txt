@@ -1,5 +1,5 @@
 # Cyber-Sentry AI - Requirements
-# Full Stack for LangGraph + Ollama + Streamlit
+# Full Stack for LangGraph + Ollama/OpenAI/Anthropic/OpenRouter + Streamlit
 
 # Core LangGraph & LangChain
 langgraph>=0.0.20
@@ -8,8 +8,13 @@ langchain-core>=0.1.0
 langchain-community>=0.0.10
 langchain-ollama>=0.0.1
 
-# Local LLM - Ollama
+# Local LLM - Ollama (default provider)
 ollama>=0.1.0
+
+# Cloud LLM providers (optional - install the one(s) you use)
+# pip install langchain-openai      # for OpenAI (GPT-4, GPT-3.5, etc.)
+#                                   # also required for OpenRouter (same package)
+# pip install langchain-anthropic   # for Anthropic (Claude-3, etc.)
 
 # Frontend - Streamlit
 streamlit>=1.28.0

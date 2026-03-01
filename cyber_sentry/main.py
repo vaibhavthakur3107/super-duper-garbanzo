@@ -1,6 +1,7 @@
 """
 Cyber-Sentry AI - LangGraph Core Application
-Multi-agent pentesting system with local LLM inference via Ollama
+Multi-agent pentesting system with local LLM inference via Ollama,
+or cloud inference via OpenAI / Anthropic / OpenRouter.
 """
 
 import os
@@ -15,14 +16,13 @@ from pathlib import Path
 
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
-from langchain_community.chat_models import ChatOllama
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
 from langchain_core.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_function
 
 # Tool definitions
 from .tools.network_tools import (
-    nmap_scan, nikto_scan, whois_lookup, dig_lookup, 
+    nmap_scan, nikto_scan, whois_lookup, dig_lookup,
     gobuster_scan, nuclei_scan, sqlmap_scan
 )
 
@@ -36,6 +36,27 @@ from .guardrails.scope_validator import validate_scope
 
 # Database
 from .db.memory import ConversationMemory
+
+# Provider constants and LLM factory (no heavy deps – safe to import anywhere)
+from .providers import (
+    PROVIDER_OLLAMA,
+    PROVIDER_OPENAI,
+    PROVIDER_ANTHROPIC,
+    PROVIDER_OPENROUTER,
+    OPENROUTER_BASE_URL,
+    get_llm,
+)
+
+# Re-export so callers can still do:  from cyber_sentry.main import get_llm, PROVIDER_*
+__all__ = [
+    "run_pentest",
+    "get_llm",
+    "PROVIDER_OLLAMA",
+    "PROVIDER_OPENAI",
+    "PROVIDER_ANTHROPIC",
+    "PROVIDER_OPENROUTER",
+    "OPENROUTER_BASE_URL",
+]
 
 
 # ============================================================================
@@ -57,20 +78,6 @@ class AgentState(TypedDict):
     iterations: int
     max_iterations: int
     error: str | None
-
-
-# ============================================================================
-# LLM Setup (Ollama)
-# ============================================================================
-
-def get_llm(model: str = "llama3", temperature: float = 0.7):
-    """Initialize Ollama LLM"""
-    return ChatOllama(
-        model=model,
-        base_url="http://localhost:11434",
-        temperature=temperature,
-        streaming=True,
-    )
 
 
 # ============================================================================
@@ -457,10 +464,10 @@ def create_graph(llm):
 # Main Execution
 # ============================================================================
 
-async def run_pentest(target: str, task: str = "Perform comprehensive pentest", model: str = "llama3"):
+async def run_pentest(target: str, task: str = "Perform comprehensive pentest", model: str = "llama3", provider: str = None):
     """Run the pentesting agent on a target"""
     
-    llm = get_llm(model=model)
+    llm = get_llm(model=model, provider=provider)
     graph = create_graph(llm)
     
     # Initialize state

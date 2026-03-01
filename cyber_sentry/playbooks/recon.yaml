@@ -1,0 +1,64 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: Reconnaissance Only
+# Passive and active information gathering without active exploitation
+# ──────────────────────────────────────────────────────────────────────────────
+name: recon
+description: >
+  Comprehensive reconnaissance playbook.
+  Passive OSINT followed by active enumeration.
+  No exploitation – information gathering only.
+version: "1.0"
+category: reconnaissance
+
+phases:
+  - name: passive_osint
+    description: Gather publicly available information without touching the target
+    tools:
+      - whois_lookup
+      - dig_lookup
+    steps:
+      - "WHOIS lookup – registrar, registrant, dates"
+      - "DNS records – A, AAAA, MX, TXT, SOA, NS, CNAME"
+      - "Certificate transparency logs search (crt.sh)"
+      - "Identify sub-domains via passive sources"
+
+  - name: dns_enumeration
+    description: Enumerate DNS records and subdomains
+    tools:
+      - dig_lookup
+    steps:
+      - "Zone transfer attempt: dig AXFR {target}"
+      - "Brute-force common subdomains"
+      - "Reverse DNS lookups on discovered IPs"
+
+  - name: active_recon
+    description: Light active scanning to confirm live hosts and open ports
+    tools:
+      - nmap_scan
+    steps:
+      - "Ping sweep: nmap -sn {target}"
+      - "Top 1000 ports: nmap -sV --top-ports 1000 {target}"
+      - "OS detection: nmap -O {target}"
+
+  - name: web_fingerprinting
+    description: Identify technology stack of web services
+    tools:
+      - nmap_scan
+      - nikto_scan
+    steps:
+      - "HTTP banner grabbing"
+      - "Identify CMS, frameworks, and libraries"
+      - "Check robots.txt and sitemap.xml"
+
+success_criteria:
+  - "Complete WHOIS and DNS record set"
+  - "Subdomain enumeration results"
+  - "Live host and service inventory"
+  - "Technology fingerprinting report"
+
+report_sections:
+  - executive_summary
+  - osint_findings
+  - dns_results
+  - host_inventory
+  - technology_stack

@@ -1,0 +1,66 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: CTF (Capture The Flag) Challenge
+# Inspired by PentestGPT's multi-category CTF solver
+# ──────────────────────────────────────────────────────────────────────────────
+name: ctf
+description: >
+  General-purpose CTF (Capture The Flag) challenge solver.
+  Covers Web, Forensics, Recon, and Crypto categories.
+  Adapt the active phases to the challenge category.
+version: "1.0"
+category: ctf
+
+phases:
+  - name: initial_recon
+    description: Understand the challenge surface
+    tools:
+      - whois_lookup
+      - dig_lookup
+      - nmap_scan
+    steps:
+      - "Identify challenge type (Web / Crypto / Reversing / Forensics / PWN)"
+      - "Basic port scan and service discovery"
+      - "Fetch and analyze page source, JS, robots.txt"
+      - "Check for hidden comments, metadata, unusual headers"
+
+  - name: web_analysis
+    description: Web-specific analysis for web challenges
+    tools:
+      - nikto_scan
+      - gobuster_scan
+    steps:
+      - "Directory and file enumeration"
+      - "Parameter fuzzing for IDOR / LFI / RFI / SQLi / XSS"
+      - "Cookie and session analysis"
+      - "Check for known CVEs in identified technologies"
+
+  - name: osint_and_metadata
+    description: Open-source intelligence and metadata extraction
+    tools:
+      - whois_lookup
+      - dig_lookup
+    steps:
+      - "Extract metadata from any provided files (exiftool)"
+      - "Check certificate transparency for subdomains"
+      - "Search GitHub / Pastebin for leaked credentials"
+
+  - name: vulnerability_exploitation
+    description: Validate and exploit found vulnerabilities
+    tools:
+      - nuclei_scan
+      - sqlmap_scan
+    steps:
+      - "Exploit identified injection points"
+      - "Escalate privileges if initial access obtained"
+      - "Read flag file or extract flag from database"
+
+success_criteria:
+  - "FLAG{ } string captured"
+  - "Full exploitation chain documented"
+
+report_sections:
+  - challenge_description
+  - methodology
+  - exploitation_steps
+  - flag
+  - lessons_learned

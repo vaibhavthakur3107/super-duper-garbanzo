@@ -1,0 +1,77 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: Cloud & Container Security Assessment
+# Covers AWS, Azure, GCP, Kubernetes, Docker
+# ──────────────────────────────────────────────────────────────────────────────
+name: cloud_security
+description: >
+  Cloud and container infrastructure security assessment.
+  Covers public resource enumeration, IAM misconfiguration, container
+  vulnerability scanning, and Kubernetes cluster security review.
+version: "1.0"
+category: cloud
+
+phases:
+  - name: public_exposure_check
+    description: Discover publicly exposed cloud resources
+    tools:
+      - cloud_enum
+      - amass_enum
+    steps:
+      - "Run cloud_enum to find open S3 buckets, Azure blobs, GCP storage"
+      - "Check for exposed metadata endpoints (169.254.169.254)"
+      - "Enumerate public DNS records for cloud service endpoints"
+      - "Test unauthenticated access to discovered storage resources"
+
+  - name: container_scanning
+    description: Scan container images for CVEs and misconfigurations
+    tools:
+      - trivy_scan
+      - docker_bench
+    steps:
+      - "Run trivy image {target} for CVE scanning"
+      - "Run docker-bench-security for CIS Docker benchmark"
+      - "Check for hardcoded secrets in Dockerfile layers"
+      - "Review exposed container ports and volumes"
+
+  - name: kubernetes_security
+    description: Assess Kubernetes cluster security posture
+    tools:
+      - kube_hunter
+    steps:
+      - "Run kube-hunter in passive mode for safe enumeration"
+      - "Check for exposed Kubernetes API server (port 6443, 8080)"
+      - "Test for anonymous authentication on kubelet (port 10250)"
+      - "Review RBAC bindings for over-privileged service accounts"
+
+  - name: iam_assessment
+    description: Audit IAM permissions and privilege escalation paths
+    tools:
+      - prowler
+    steps:
+      - "Run prowler for CIS benchmark compliance"
+      - "Check for wildcard IAM policies (*:*)"
+      - "Identify privilege escalation paths via iam:PassRole"
+      - "Review public S3 bucket policies and ACLs"
+
+  - name: secret_detection
+    description: Hunt for leaked cloud credentials
+    tools:
+      - trufflehog
+      - gau
+    steps:
+      - "Scan code repositories for AWS keys, GCP service accounts"
+      - "Check environment variables and metadata endpoints"
+      - "Review CI/CD pipeline configurations for leaked secrets"
+
+success_criteria:
+  - "Public cloud resource inventory"
+  - "Container and image vulnerability report"
+  - "Kubernetes security posture assessment"
+  - "IAM misconfiguration findings"
+
+report_sections:
+  - executive_summary
+  - cloud_exposure_summary
+  - container_vulnerabilities
+  - iam_findings
+  - remediation_priorities

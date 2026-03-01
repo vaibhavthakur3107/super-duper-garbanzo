@@ -1,0 +1,83 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: Binary Analysis & Digital Forensics
+# Covers reverse engineering, memory forensics, and steganography
+# ──────────────────────────────────────────────────────────────────────────────
+name: binary_forensics
+description: >
+  Binary analysis and digital forensics playbook.
+  Covers static binary analysis, reverse engineering, memory dump investigation,
+  file carving, steganography detection, and CTF-style binary challenges.
+version: "1.0"
+category: forensics
+
+phases:
+  - name: file_identification
+    description: Identify and characterise the target file(s)
+    tools:
+      - exiftool
+      - strings_extract
+      - checksec
+    steps:
+      - "Run file {target} to identify the file type and architecture"
+      - "Run exiftool {target} to extract all embedded metadata"
+      - "Run strings to extract printable strings (look for flags, creds, paths)"
+      - "Run checksec to review binary security mitigations (NX, PIE, ASLR, canary)"
+
+  - name: static_analysis
+    description: Disassemble and statically analyse the binary
+    tools:
+      - radare2
+      - gdb_debug
+      - binwalk_scan
+    steps:
+      - "Run binwalk to detect embedded files, firmware, or archives"
+      - "Run radare2 -A for automated analysis and function listing"
+      - "Identify main(), interesting function calls, and syscalls"
+      - "Look for hardcoded credentials, encryption keys, or flags"
+
+  - name: dynamic_analysis
+    description: Run the binary in a controlled environment
+    tools:
+      - gdb_debug
+    steps:
+      - "Set breakpoints at key functions (main, strcmp, strcpy)"
+      - "Trace system calls with strace / ltrace"
+      - "Test for buffer overflows and memory corruption"
+      - "Examine heap and stack layout"
+
+  - name: memory_forensics
+    description: Analyse memory dumps for IOCs and artifacts
+    tools:
+      - volatility3
+    steps:
+      - "Run volatility windows.pslist to list running processes"
+      - "Run volatility windows.netscan for network connections"
+      - "Run volatility windows.cmdline for process command lines"
+      - "Dump suspicious process memory and strings"
+      - "Extract credentials with windows.hashdump"
+
+  - name: file_carving_and_steganography
+    description: Recover hidden files and detect steganography
+    tools:
+      - foremost
+      - steghide
+      - binwalk_scan
+    steps:
+      - "Run foremost to carve embedded files from binary/image"
+      - "Run steghide info to detect hidden payloads in images"
+      - "Run zsteg (PNG/BMP), stegsolve for visual steganography"
+      - "Check LSB (Least Significant Bit) encoding in images"
+
+success_criteria:
+  - "Binary security properties documented"
+  - "Static and dynamic analysis report"
+  - "Memory artifacts extracted and analysed"
+  - "Hidden data discovered and decoded"
+
+report_sections:
+  - executive_summary
+  - file_identification
+  - static_analysis_findings
+  - dynamic_analysis_results
+  - memory_forensics_report
+  - recommendations
