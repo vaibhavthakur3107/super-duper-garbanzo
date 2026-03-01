@@ -258,6 +258,8 @@ class CTFWorkflowManager(Agent):
         scores: dict[str, int] = {}
         for cat, info in self.CATEGORIES.items():
             scores[cat] = sum(1 for ind in info["indicators"] if ind in desc_lower)
+        if not scores:
+            return "misc"
         best = max(scores, key=scores.get)  # type: ignore[arg-type]
         return best if scores[best] > 0 else "misc"
 
@@ -544,7 +546,7 @@ class AIExploitGenerator(Agent):
             score = sum(1 for kw in keywords if kw in desc_lower)
             if score > best_score:
                 best_type, best_score = vtype, score
-        return best_type
+        return best_type  # defaults to "rce" when no keywords match
 
     async def _reason(self, prompt: str) -> str:
         vuln_type = self.detect_vuln_type(prompt)
@@ -809,7 +811,7 @@ class RateLimitDetector(Agent):
             self.rate_limit_detected = True
             self.current_delay = min(self.current_delay * self.backoff_multiplier, self.max_delay)
             retry_after = (headers or {}).get("retry-after")
-            if retry_after and retry_after.isdigit():
+            if retry_after is not None and isinstance(retry_after, str) and retry_after.isdigit():
                 self.current_delay = max(self.current_delay, float(retry_after))
             assessment.update({
                 "rate_limited": True,
@@ -823,10 +825,13 @@ class RateLimitDetector(Agent):
             assessment["recommended_delay"] = self.current_delay
 
         remaining = (headers or {}).get("x-ratelimit-remaining")
-        if remaining is not None and str(remaining).isdigit() and int(remaining) < 10:
-            self.current_delay = min(self.current_delay * 1.5, self.max_delay)
-            assessment["action"] = "preemptive_slow"
-            assessment["recommended_delay"] = self.current_delay
+        try:
+            if remaining is not None and int(remaining) < 10:
+                self.current_delay = min(self.current_delay * 1.5, self.max_delay)
+                assessment["action"] = "preemptive_slow"
+                assessment["recommended_delay"] = self.current_delay
+        except (ValueError, TypeError):
+            pass
 
         return assessment
 
