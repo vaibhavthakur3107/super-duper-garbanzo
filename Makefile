@@ -33,6 +33,12 @@ run-api:  ## Start FastAPI backend (http://localhost:8000)
 run-cli:  ## Start interactive CLI agent
 	$(PYTHON) -m cyber_sentry.cli
 
+run-mcp:  ## Start MCP server (for Claude Desktop / Cursor / VS Code Copilot)
+	$(PYTHON) cyber_sentry_mcp.py
+
+run-mcp-compact:  ## Start MCP server in compact mode (minimal tools)
+	$(PYTHON) cyber_sentry_mcp.py --compact
+
 # ── Docker ─────────────────────────────────────────────────────────────────────
 docker-build:  ## Build Docker image
 	docker compose build

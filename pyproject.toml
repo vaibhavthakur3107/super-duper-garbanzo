@@ -25,7 +25,8 @@ dependencies = [
 openai = ["langchain-openai"]       # also covers OpenRouter
 anthropic = ["langchain-anthropic"]
 ollama = ["langchain-ollama", "ollama>=0.1.0"]
-all = ["cyber-sentry[openai,anthropic,ollama]"]
+mcp = ["mcp[cli]>=1.0.0"]          # FastMCP for AI client integration
+all = ["cyber-sentry[openai,anthropic,ollama,mcp]"]
 dev = ["pytest>=7.0", "pyyaml"]
 
 [project.scripts]

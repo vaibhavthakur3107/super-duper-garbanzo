@@ -998,3 +998,104 @@ class TestCLIEnhancements:
     def test_agents_list_defined(self):
         from cyber_sentry.cli import _AGENTS
         assert len(_AGENTS) >= 12
+
+
+# ── MCP Server ────────────────────────────────────────────────────────────────
+
+class TestMCPServer:
+    """Tests for the FastMCP-based MCP server (cyber_sentry_mcp.py)."""
+
+    def test_mcp_script_importable(self):
+        """The MCP server module is importable."""
+        import cyber_sentry_mcp
+        assert hasattr(cyber_sentry_mcp, "setup_mcp_server")
+        assert hasattr(cyber_sentry_mcp, "main")
+
+    def test_setup_mcp_server_full(self):
+        """Full-mode setup returns a FastMCP instance."""
+        from cyber_sentry_mcp import setup_mcp_server
+        mcp = setup_mcp_server(compact=False)
+        assert mcp is not None
+
+    def test_setup_mcp_server_compact(self):
+        """Compact-mode setup returns a FastMCP instance."""
+        from cyber_sentry_mcp import setup_mcp_server
+        mcp = setup_mcp_server(compact=True)
+        assert mcp is not None
+
+    def test_gateway_scope_check(self):
+        """scope_check tool validates authorized targets."""
+        from cyber_sentry_mcp import _validate_scope
+        assert _validate_scope("example.com") is True
+        assert _validate_scope("testphp.vulnweb.com") is True
+        assert _validate_scope("evil.com") is False
+
+    def test_run_tool_unauthorized(self):
+        """_run_tool rejects out-of-scope targets."""
+        from cyber_sentry_mcp import _run_tool
+        result = _run_tool("nmap_scan", "", "evil.com")
+        assert result["success"] is False
+        assert "NOT in the authorized scope" in result["error"]
+
+    def test_run_tool_unknown(self):
+        """_run_tool returns error for unknown tool names."""
+        from cyber_sentry_mcp import _run_tool
+        result = _run_tool("nonexistent_tool", "", "example.com")
+        assert result["success"] is False
+        assert "Unknown tool" in result["error"]
+
+    def test_get_version(self):
+        """_get_version returns the package version."""
+        from cyber_sentry_mcp import _get_version
+        version = _get_version()
+        assert version  # non-empty string
+
+    def test_mcp_config_json_exists(self):
+        """cyber-sentry-mcp.json config file exists and is valid JSON."""
+        config_path = Path(__file__).parent.parent / "cyber-sentry-mcp.json"
+        assert config_path.exists()
+        data = json.loads(config_path.read_text())
+        assert "mcpServers" in data
+        assert "cyber-sentry" in data["mcpServers"]
+        cfg = data["mcpServers"]["cyber-sentry"]
+        assert cfg["command"] == "python3"
+        assert "cyber_sentry_mcp.py" in cfg["args"][0]
+
+    def test_parse_args_defaults(self):
+        """parse_args returns correct defaults."""
+        import sys
+        old_argv = sys.argv
+        sys.argv = ["cyber_sentry_mcp.py"]
+        try:
+            from cyber_sentry_mcp import parse_args
+            args = parse_args()
+            assert args.server is None
+            assert args.timeout == 300
+            assert args.compact is False
+            assert args.debug is False
+        finally:
+            sys.argv = old_argv
+
+    def test_parse_args_compact(self):
+        """parse_args respects --compact flag."""
+        import sys
+        old_argv = sys.argv
+        sys.argv = ["cyber_sentry_mcp.py", "--compact"]
+        try:
+            from cyber_sentry_mcp import parse_args
+            args = parse_args()
+            assert args.compact is True
+        finally:
+            sys.argv = old_argv
+
+    def test_parse_args_server(self):
+        """parse_args respects --server flag."""
+        import sys
+        old_argv = sys.argv
+        sys.argv = ["cyber_sentry_mcp.py", "--server", "http://localhost:8000"]
+        try:
+            from cyber_sentry_mcp import parse_args
+            args = parse_args()
+            assert args.server == "http://localhost:8000"
+        finally:
+            sys.argv = old_argv

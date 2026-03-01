@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "cyber-sentry": {
+      "command": "python3",
+      "args": [
+        "/path/to/cyber_sentry_mcp.py"
+      ],
+      "description": "Cyber-Sentry AI v2.0 – AI-Powered Red Team Pentesting Agent. Supports 151+ security tools, 12+ AI agents, 7 attack playbooks.",
+      "timeout": 300,
+      "alwaysAllow": []
+    }
+  }
+}

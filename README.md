@@ -91,9 +91,138 @@ python -m cyber_sentry.cli mcp add nmap npx gc-nmap-mcp
 
 ---
 
-## 🧩 MCP Support
+## 🧩 MCP Support — AI Client Integration
 
-Cyber-Sentry supports [Model Context Protocol](https://modelcontextprotocol.io/) servers, letting you plug in any MCP-compatible tool (nmap, Metasploit, Burp Suite extensions, etc.).
+Cyber-Sentry includes a **FastMCP-based MCP server** (inspired by [HexStrike AI](https://github.com/0x4m4/hexstrike-ai)) that lets you use all 151+ security tools directly from **Claude Desktop**, **Cursor**, or **VS Code Copilot** — no Docker required.
+
+### Quick Setup (No Docker)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/vaibhavthakur3107/super-duper-garbanzo.git
+cd super-duper-garbanzo
+
+# 2. Create virtual environment
+python3 -m venv cyber-sentry-env
+source cyber-sentry-env/bin/activate   # Linux/Mac
+# cyber-sentry-env\Scripts\activate    # Windows
+
+# 3. Install dependencies
+pip3 install -e "."
+pip3 install "mcp[cli]>=1.0.0"
+
+# 4. Start the MCP server (to test it works)
+python3 cyber_sentry_mcp.py --list-tools
+
+# 5. Or start it in compact mode (3 gateway tools only — ideal for small LLMs)
+python3 cyber_sentry_mcp.py --compact --list-tools
+```
+
+### Claude Desktop Integration
+
+Edit `~/.config/Claude/claude_desktop_config.json` (Linux/Mac) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "cyber-sentry": {
+      "command": "python3",
+      "args": [
+        "/path/to/super-duper-garbanzo/cyber_sentry_mcp.py"
+      ],
+      "description": "Cyber-Sentry AI v2.0 – AI Red Team Pentesting Agent",
+      "timeout": 300,
+      "disabled": false
+    }
+  }
+}
+```
+
+> **Tip:** Use the full path to your venv Python if you installed in a venv:
+> `"command": "/path/to/super-duper-garbanzo/cyber-sentry-env/bin/python3"`
+
+### Cursor Integration
+
+Same JSON config as Claude Desktop — add it to Cursor's MCP settings.
+
+### VS Code Copilot Integration
+
+Add to `.vscode/settings.json`:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "cyber-sentry": {
+        "type": "stdio",
+        "command": "python3",
+        "args": [
+          "/path/to/super-duper-garbanzo/cyber_sentry_mcp.py"
+        ]
+      }
+    }
+  }
+}
+```
+
+### OpenCode Integration
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "cyber-sentry": {
+      "type": "local",
+      "timeout": 300,
+      "command": [
+        "/path/to/super-duper-garbanzo/cyber-sentry-env/bin/python3",
+        "/path/to/super-duper-garbanzo/cyber_sentry_mcp.py"
+      ],
+      "enabled": true
+    }
+  }
+}
+```
+
+### MCP Server Flags
+
+| Flag | Description |
+|---|---|
+| `--compact` | Load only 3 gateway tools (scope_check, run_security_tool, system_status) — for small LLMs |
+| `--server URL` | Optional upstream Cyber-Sentry API server URL |
+| `--timeout N` | Tool execution timeout in seconds (default: 300) |
+| `--debug` | Enable debug logging |
+| `--list-tools` | Print registered tools and exit |
+
+### Available MCP Tools (21 tools in full mode)
+
+| Tool | Description |
+|---|---|
+| `scope_check` | Check if a target is in the authorized pentesting scope |
+| `run_security_tool` | Execute any of the 151+ tools by name |
+| `system_status` | Show system status (version, tools, scopes) |
+| `nmap_scan` | Port/service scanning |
+| `nikto_scan` | Web vulnerability scanning |
+| `nuclei_scan` | Template-based vulnerability scanning (4000+ templates) |
+| `sqlmap_scan` | SQL injection testing |
+| `gobuster_scan` | Directory/file enumeration |
+| `whois_lookup` | Domain WHOIS lookup |
+| `dig_lookup` | DNS record lookup |
+| `curl_scan` | HTTP header/response analysis |
+| `analyze_security_headers` | Security header grading |
+| `detect_technologies` | Web technology fingerprinting |
+| `find_forms` | HTML form/input discovery |
+| `check_cors` | CORS misconfiguration testing |
+| `cve_lookup` | CVE intelligence lookup |
+| `cve_search` | CVE database search |
+| `add_note` | Save findings to loot directory |
+| `get_notes` | Retrieve saved findings |
+| `list_tools` | List all 151+ available tools |
+| `list_playbooks` | List attack playbooks |
+
+### Using with MCP Servers (External Tools)
+
+Cyber-Sentry also supports [Model Context Protocol](https://modelcontextprotocol.io/) servers for external tools:
 
 ```bash
 # Configure MCP servers
