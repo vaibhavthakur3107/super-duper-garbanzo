@@ -8,14 +8,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc libffi-dev libssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
-COPY cyber_sentry/requirements.txt /app/requirements.txt
+COPY dexter_ai/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 
 # ── Stage 2: runtime ──────────────────────────────────────────────────────────
 FROM python:3.11-slim
 
-LABEL maintainer="Cyber-Sentry AI"
+LABEL maintainer="Dexter AI Pentest"
 LABEL description="AI-powered Red Team Pentesting Agent"
 
 WORKDIR /app
@@ -47,4 +47,4 @@ USER sentry
 EXPOSE 8501 8000
 
 # Default: start Streamlit UI
-CMD ["streamlit", "run", "cyber_sentry/app.py", "--server.address=0.0.0.0", "--server.port=8501"]
+CMD ["streamlit", "run", "dexter_ai/app.py", "--server.address=0.0.0.0", "--server.port=8501"]

@@ -1,6 +1,6 @@
-# 🔍 Cyber-Sentry AI vs HexStrike / PentAGI — Honest Comparison
+# 🔍 Dexter AI Pentest vs HexStrike / PentAGI — Honest Comparison
 
-> **Short answer:** No, Cyber-Sentry is not 100% feature-equivalent to HexStrike AI (150-170 tools) or PentAGI.
+> **Short answer:** No, Dexter AI Pentest is not 100% feature-equivalent to HexStrike AI (150-170 tools) or PentAGI.
 > It started with 8 tool wrappers. After this expansion it has **67 tool wrappers** across 9 categories.
 > This document explains every difference honestly so you know exactly what you have and what to build next.
 
@@ -8,7 +8,7 @@
 
 ## 📊 Quick Stats Table
 
-| Feature | HexStrike AI v6 | HexStrike CE (Community) | PentAGI | **Cyber-Sentry AI** |
+| Feature | HexStrike AI v6 | HexStrike CE (Community) | PentAGI | **Dexter AI Pentest** |
 |---|---|---|---|---|
 | **Tool count** | 150+ | 170+ | 20+ (sandboxed) | **67** |
 | **AI agents** | 12+ | 12+ | 4 (Researcher/Dev/Exec/Orch) | **4** |
@@ -30,10 +30,10 @@
 
 ## 🔧 Tool-by-Tool Comparison
 
-### ✅ Tools Cyber-Sentry HAS (67 total)
+### ✅ Tools Dexter AI Pentest HAS (67 total)
 
 #### Network Reconnaissance (17)
-| Tool | Cyber-Sentry | HexStrike | Notes |
+| Tool | Dexter AI Pentest | HexStrike | Notes |
 |---|---|---|---|
 | nmap | ✅ | ✅ | |
 | rustscan | ✅ | ✅ | |
@@ -54,7 +54,7 @@
 | curl | ✅ | (built-in) | |
 
 #### Web Application (22)
-| Tool | Cyber-Sentry | HexStrike | Notes |
+| Tool | Dexter AI Pentest | HexStrike | Notes |
 |---|---|---|---|
 | gobuster | ✅ | ✅ | |
 | feroxbuster | ✅ | ✅ | |
@@ -85,7 +85,7 @@
 | nosqlmap | ❌ | ✅ | NoSQL injection |
 
 #### Authentication & Password (6)
-| Tool | Cyber-Sentry | HexStrike | Notes |
+| Tool | Dexter AI Pentest | HexStrike | Notes |
 |---|---|---|---|
 | hydra | ✅ | ✅ | |
 | john the ripper | ✅ | ✅ | |
@@ -97,7 +97,7 @@
 | ophcrack | ❌ | ✅ | |
 
 #### OSINT (8)
-| Tool | Cyber-Sentry | HexStrike | Notes |
+| Tool | Dexter AI Pentest | HexStrike | Notes |
 |---|---|---|---|
 | theHarvester | ✅ | ✅ | |
 | gau | ✅ | ✅ | |
@@ -113,7 +113,7 @@
 | maltego | ❌ | ✅ | GUI tool |
 
 #### Forensics & Binary Analysis (9)
-| Tool | Cyber-Sentry | HexStrike | Notes |
+| Tool | Dexter AI Pentest | HexStrike | Notes |
 |---|---|---|---|
 | volatility3 | ✅ | ✅ | Memory forensics |
 | binwalk | ✅ | ✅ | Firmware |
@@ -132,7 +132,7 @@
 | stegsolve / zsteg | ❌ | ✅ | Advanced steg |
 
 #### Cloud Security (5)
-| Tool | Cyber-Sentry | HexStrike | Notes |
+| Tool | Dexter AI Pentest | HexStrike | Notes |
 |---|---|---|---|
 | trivy | ✅ | ✅ | Container scanning |
 | prowler | ✅ | ✅ | AWS/Azure/GCP CIS |
@@ -146,10 +146,10 @@
 
 ---
 
-## ❌ What Cyber-Sentry Does NOT Have (vs HexStrike)
+## ❌ What Dexter AI Pentest Does NOT Have (vs HexStrike)
 
 ### Missing Tool Categories
-| Category | HexStrike Count | Cyber-Sentry | Gap |
+| Category | HexStrike Count | Dexter AI Pentest | Gap |
 |---|---|---|---|
 | Browser Agent (headless Chrome) | 10 features | ❌ 0 | Full browser automation for DOM analysis |
 | Database direct query tools | 3 (MySQL/PG/SQLite) | ❌ 0 | Direct DB querying without sqlmap |
@@ -159,7 +159,7 @@
 
 ### Missing Architectural Features
 
-| Feature | HexStrike | PentAGI | Cyber-Sentry |
+| Feature | HexStrike | PentAGI | Dexter AI Pentest |
 |---|---|---|---|
 | **Browser Agent** (Selenium + headless Chrome) | ✅ Full DOM analysis, screenshots, JS exec | ❌ | ❌ |
 | **Smart caching** (LRU result cache) | ✅ | Redis cache | ❌ |
@@ -182,15 +182,15 @@
 
 ---
 
-## ✅ What Cyber-Sentry Has That the Others DON'T
+## ✅ What Dexter AI Pentest Has That the Others DON'T
 
-| Feature | Cyber-Sentry | HexStrike | PentAGI |
+| Feature | Dexter AI Pentest | HexStrike | PentAGI |
 |---|---|---|---|
 | **LangGraph state machine** (transparent reasoning) | ✅ | ❌ | ❌ |
 | **Structured thought trace** (every step logged) | ✅ | ❌ | Partial |
 | **7 safety guardrails** (scope, prompt injection, legal, output filtering, audit log) | ✅ | ❌ | Docker isolation only |
 | **Built-in Streamlit web UI** (no extra client needed) | ✅ | ❌ (needs Claude/VSCode) | ✅ |
-| **Interactive CLI REPL** (`cyber-sentry>` shell) | ✅ | ❌ | ❌ |
+| **Interactive CLI REPL** (`dexter-ai>` shell) | ✅ | ❌ | ❌ |
 | **Persistent notes/loot system** (JSON, per-target, per-category) | ✅ | ❌ | Partial |
 | **Markdown report generation** (from thought trace + notes) | ✅ | ❌ | ✅ |
 | **4 ready-to-run attack playbooks** → now **7** | ✅ | Workflows | Tasks |
@@ -258,4 +258,4 @@ Multiple search engines (Perplexity, Sploitus, Searxng)
 | Enterprise monitoring | ❌ 0% of PentAGI |
 | Knowledge graph | ❌ 0% of PentAGI |
 
-**Bottom line:** Cyber-Sentry has all the essential tools for professional penetration testing, CTF solving, and bug bounty hunting. It covers 7 of 9 tool categories that HexStrike covers. The main gaps are: browser agent automation, advanced Windows/AD tools (BloodHound, Mimikatz), and enterprise observability (Grafana, Langfuse). These can all be added incrementally.
+**Bottom line:** Dexter AI Pentest has all the essential tools for professional penetration testing, CTF solving, and bug bounty hunting. It covers 7 of 9 tool categories that HexStrike covers. The main gaps are: browser agent automation, advanced Windows/AD tools (BloodHound, Mimikatz), and enterprise observability (Grafana, Langfuse). These can all be added incrementally.

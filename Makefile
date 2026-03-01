@@ -25,13 +25,19 @@ setup: install  ## Create .env from example and install deps
 
 # ── Run ────────────────────────────────────────────────────────────────────────
 run:  ## Start Streamlit UI (http://localhost:8501)
-	cd cyber_sentry && streamlit run app.py
+	cd dexter_ai && streamlit run app.py
 
 run-api:  ## Start FastAPI backend (http://localhost:8000)
-	uvicorn cyber_sentry.api.main:app --reload --host 0.0.0.0 --port 8000
+	uvicorn dexter_ai.api.main:app --reload --host 0.0.0.0 --port 8000
 
 run-cli:  ## Start interactive CLI agent
-	$(PYTHON) -m cyber_sentry.cli
+	$(PYTHON) -m dexter_ai.cli
+
+run-mcp:  ## Start MCP server (for Claude Desktop / Cursor / VS Code Copilot)
+	$(PYTHON) dexter_ai_mcp.py
+
+run-mcp-compact:  ## Start MCP server in compact mode (minimal tools)
+	$(PYTHON) dexter_ai_mcp.py --compact
 
 # ── Docker ─────────────────────────────────────────────────────────────────────
 docker-build:  ## Build Docker image
@@ -51,7 +57,7 @@ test:  ## Run test suite
 	$(PYTHON) -m pytest tests/ -v
 
 lint:  ## Run linter
-	$(PYTHON) -m flake8 cyber_sentry/ --max-line-length=120 --ignore=E501,W503
+	$(PYTHON) -m flake8 dexter_ai/ --max-line-length=120 --ignore=E501,W503
 
 # ── Convenience ────────────────────────────────────────────────────────────────
 pull-ollama:  ## Pull default Ollama model (llama3)

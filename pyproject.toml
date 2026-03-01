@@ -1,12 +1,12 @@
 [build-system]
 requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "cyber-sentry"
+name = "dexter-ai"
 version = "1.0.0"
 description = "AI-powered Red Team Pentesting Agent built with LangGraph"
-readme = "cyber_sentry/README.md"
+readme = "dexter_ai/README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = [
@@ -25,15 +25,16 @@ dependencies = [
 openai = ["langchain-openai"]       # also covers OpenRouter
 anthropic = ["langchain-anthropic"]
 ollama = ["langchain-ollama", "ollama>=0.1.0"]
-all = ["cyber-sentry[openai,anthropic,ollama]"]
+mcp = ["mcp[cli]>=1.0.0"]          # FastMCP for AI client integration
+all = ["dexter-ai[openai,anthropic,ollama,mcp]"]
 dev = ["pytest>=7.0", "pyyaml"]
 
 [project.scripts]
-cyber-sentry = "cyber_sentry.cli:main"
+dexter-ai = "dexter_ai.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["cyber_sentry*"]
+include = ["dexter_ai*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

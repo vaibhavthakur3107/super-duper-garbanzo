@@ -1,4 +1,4 @@
-# 🛡️ Cyber-Sentry AI — Complete Beginner's Setup & Usage Guide
+# 🛡️ Dexter AI Pentest — Complete Beginner's Setup & Usage Guide
 
 > **Read this first if you are new to the project.**
 > This guide walks you through everything — from zero to running your first AI-powered pentest — in plain language.
@@ -7,7 +7,7 @@
 
 ## Table of Contents
 
-1. [What is Cyber-Sentry AI?](#1-what-is-cyber-sentry-ai)
+1. [What is Dexter AI Pentest?](#1-what-is-dexter-ai-pentest)
 2. [How does it compare to similar projects?](#2-how-does-it-compare-to-similar-projects)
 3. [System Requirements](#3-system-requirements)
 4. [Installation — Option A: Local Python (Recommended for beginners)](#4-option-a-local-python)
@@ -27,9 +27,9 @@
 
 ---
 
-## 1. What is Cyber-Sentry AI?
+## 1. What is Dexter AI Pentest?
 
-Cyber-Sentry is an **AI-powered autonomous Red Team pentesting agent**.
+Dexter AI Pentest is an **AI-powered autonomous Red Team pentesting agent**.
 You give it a target (a domain, IP address, or IP range you are authorized to test) and a task, and it:
 
 1. **Plans** a step-by-step attack strategy using an LLM
@@ -48,7 +48,7 @@ The agent loop is built with **LangGraph** (a state-machine framework for LLM ag
 
 ## 2. How does it compare to similar projects?
 
-| Feature | Cyber-Sentry | PentestGPT | Pentagi | PentestAgent | Shannon |
+| Feature | Dexter AI Pentest | PentestGPT | Pentagi | PentestAgent | Shannon |
 |---|:---:|:---:|:---:|:---:|:---:|
 | LangGraph state machine | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Ollama (free, local LLM) | ✅ | ❌ | ✅ | ✅ | ❌ |
@@ -67,7 +67,7 @@ The agent loop is built with **LangGraph** (a state-machine framework for LLM ag
 | Docker-ready | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Test suite (56 tests) | ✅ | ✅ | ✅ | ✅ | ❌ |
 
-**Cyber-Sentry uniquely combines** a LangGraph state machine, Streamlit thought-trace UI, FastAPI backend, MCP integration, knowledge base RAG, and support for all major LLM providers — making it the most feature-complete of the referenced projects.
+**Dexter AI Pentest uniquely combines** a LangGraph state machine, Streamlit thought-trace UI, FastAPI backend, MCP integration, knowledge base RAG, and support for all major LLM providers — making it the most feature-complete of the referenced projects.
 
 ---
 
@@ -121,7 +121,7 @@ source .venv/bin/activate      # Linux/macOS
 pip install -e "."
 ```
 
-This installs Cyber-Sentry and its core dependencies (LangGraph, LangChain, Streamlit, FastAPI, etc.).
+This installs Dexter AI Pentest and its core dependencies (LangGraph, LangChain, Streamlit, FastAPI, etc.).
 
 **For cloud LLM providers, also run:**
 
@@ -262,7 +262,7 @@ AUTHORIZED_SCOPES=example.com,192.168.1.0,10.0.0.0,localhost,127.0.0.1
 # Local Python
 make run
 # OR directly:
-streamlit run cyber_sentry/app.py
+streamlit run dexter_ai/app.py
 
 # Docker
 docker compose up
@@ -274,7 +274,7 @@ Open your browser at **http://localhost:8501**.
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│ 🛡️ Cyber-Sentry AI                                  │
+│ 🛡️ Dexter AI Pentest                                  │
 │ ── Sidebar ──────────────────────────────────────── │
 │  LLM Provider: [ollama ▾]                           │
 │  Model: [llama3 ▾]                                  │
@@ -308,7 +308,7 @@ The CLI is great for scripting, automation, and running headless on a remote ser
 ### Start the interactive REPL
 
 ```bash
-python -m cyber_sentry.cli
+python -m dexter_ai.cli
 ```
 
 You will see the banner:
@@ -321,42 +321,42 @@ You will see the banner:
 
 Type /help for commands, /quit to exit.
 
-cyber-sentry>
+dexter-ai>
 ```
 
 ### Basic CLI walkthrough
 
 ```
 # 1. Set your target
-cyber-sentry> /target 192.168.1.10
+dexter-ai> /target 192.168.1.10
 
 # 2. Run a task
-cyber-sentry> perform reconnaissance and port scan
+dexter-ai> perform reconnaissance and port scan
 
 # 3. Or use a built-in playbook
-cyber-sentry> /playbook recon
+dexter-ai> /playbook recon
 
 # 4. View saved findings
-cyber-sentry> /notes
+dexter-ai> /notes
 
 # 5. Generate a report
-cyber-sentry> /report
+dexter-ai> /report
 
 # 6. List all available commands
-cyber-sentry> /help
+dexter-ai> /help
 ```
 
 ### One-shot non-interactive mode (great for scripts)
 
 ```bash
 # Run a playbook and save a report
-python -m cyber_sentry.cli run \
+python -m dexter_ai.cli run \
     --target 192.168.1.10 \
     --playbook web_pentest \
     --report
 
 # Custom task
-python -m cyber_sentry.cli run \
+python -m dexter_ai.cli run \
     --target example.com \
     --task "Find open ports and check for web vulnerabilities" \
     --model llama3 \
@@ -366,12 +366,12 @@ python -m cyber_sentry.cli run \
 ### All CLI commands
 
 ```bash
-python -m cyber_sentry.cli --help
-python -m cyber_sentry.cli run --help
-python -m cyber_sentry.cli playbooks        # list playbooks
-python -m cyber_sentry.cli notes            # show saved findings
-python -m cyber_sentry.cli mcp list         # list MCP servers
-python -m cyber_sentry.cli mcp add nmap npx -y gc-nmap-mcp
+python -m dexter_ai.cli --help
+python -m dexter_ai.cli run --help
+python -m dexter_ai.cli playbooks        # list playbooks
+python -m dexter_ai.cli notes            # show saved findings
+python -m dexter_ai.cli mcp list         # list MCP servers
+python -m dexter_ai.cli mcp add nmap npx -y gc-nmap-mcp
 ```
 
 ### Available slash commands in the REPL
@@ -454,13 +454,13 @@ Playbooks are pre-built attack workflows. Each playbook defines the task descrip
 
 **CLI (interactive)**:
 ```
-cyber-sentry> /playbook recon
+dexter-ai> /playbook recon
 Enter target: 192.168.1.10
 ```
 
 **CLI (one-shot)**:
 ```bash
-python -m cyber_sentry.cli run -t 192.168.1.10 --playbook network_audit --report
+python -m dexter_ai.cli run -t 192.168.1.10 --playbook network_audit --report
 ```
 
 **Streamlit UI**:
@@ -469,10 +469,10 @@ python -m cyber_sentry.cli run -t 192.168.1.10 --playbook network_audit --report
 
 ### Creating your own playbook
 
-Add a `.yaml` file to `cyber_sentry/playbooks/`:
+Add a `.yaml` file to `dexter_ai/playbooks/`:
 
 ```yaml
-# cyber_sentry/playbooks/my_custom.yaml
+# dexter_ai/playbooks/my_custom.yaml
 name: my_custom
 category: custom
 description: |
@@ -507,10 +507,10 @@ The agent automatically saves all findings to `loot/notes.json`. This persists a
 
 ```bash
 # CLI subcommand
-python -m cyber_sentry.cli notes
+python -m dexter_ai.cli notes
 
 # Interactive REPL
-cyber-sentry> /notes
+dexter-ai> /notes
 ```
 
 ### Storage location
@@ -526,10 +526,10 @@ LOOT_DIR=/path/to/my/loot
 
 ```bash
 # Interactive REPL
-cyber-sentry> /report
+dexter-ai> /report
 
 # One-shot mode
-python -m cyber_sentry.cli run -t example.com --playbook recon --report
+python -m dexter_ai.cli run -t example.com --playbook recon --report
 ```
 
 The report is saved as `loot/report_YYYYMMDD_HHMMSS.md` and includes:
@@ -541,7 +541,7 @@ The report is saved as `loot/report_YYYYMMDD_HHMMSS.md` and includes:
 
 ## 12. MCP Server Integration
 
-[MCP (Model Context Protocol)](https://modelcontextprotocol.io/) lets you plug any external tool into Cyber-Sentry as a first-class agent tool — nmap MCP, Metasploit MCP, Burp Suite extensions, or your own custom tool server.
+[MCP (Model Context Protocol)](https://modelcontextprotocol.io/) lets you plug any external tool into Dexter AI Pentest as a first-class agent tool — nmap MCP, Metasploit MCP, Burp Suite extensions, or your own custom tool server.
 
 ### Step 1 — Create your MCP config file
 
@@ -570,26 +570,26 @@ cp mcp_servers.json.example mcp_servers.json
 
 ```bash
 # Add nmap MCP server
-python -m cyber_sentry.cli mcp add nmap npx -y gc-nmap-mcp
+python -m dexter_ai.cli mcp add nmap npx -y gc-nmap-mcp
 
 # Add a custom server
-python -m cyber_sentry.cli mcp add my_tool python3 /path/to/my_mcp_server.py
+python -m dexter_ai.cli mcp add my_tool python3 /path/to/my_mcp_server.py
 ```
 
 ### Step 4 — Test the connection
 
 ```bash
-python -m cyber_sentry.cli mcp test nmap
+python -m dexter_ai.cli mcp test nmap
 # [+] Server 'nmap' (npx) is available
 ```
 
 ### In the interactive REPL
 
 ```
-cyber-sentry> /mcp list
+dexter-ai> /mcp list
   ✓ nmap            npx    nmap MCP server for network scanning
 
-cyber-sentry> /mcp test nmap
+dexter-ai> /mcp test nmap
 [+] Server 'nmap' (npx) is available
 ```
 
@@ -602,16 +602,16 @@ The knowledge base injects domain knowledge into agent prompts — like giving t
 ### Built-in knowledge
 
 Two files come pre-loaded:
-- `cyber_sentry/knowledge/sources/web_methodology.md` — OWASP web pentest methodology
-- `cyber_sentry/knowledge/sources/network_methodology.md` — Network audit methodology
+- `dexter_ai/knowledge/sources/web_methodology.md` — OWASP web pentest methodology
+- `dexter_ai/knowledge/sources/network_methodology.md` — Network audit methodology
 
 ### Adding your own knowledge
 
-Just drop `.md` or `.txt` files into `cyber_sentry/knowledge/sources/`:
+Just drop `.md` or `.txt` files into `dexter_ai/knowledge/sources/`:
 
 ```bash
 # Add a CVE cheat sheet
-cat > cyber_sentry/knowledge/sources/cve_cheatsheet.md << 'EOF'
+cat > dexter_ai/knowledge/sources/cve_cheatsheet.md << 'EOF'
 # Common CVEs to Check
 
 ## Apache
@@ -631,7 +631,7 @@ The agent will automatically inject relevant sections when planning its next mov
 ### Checking what's loaded
 
 ```python
-from cyber_sentry.knowledge import knowledge_base
+from dexter_ai.knowledge import knowledge_base
 print(knowledge_base.list_sources())
 # ['web_methodology', 'network_methodology', 'cve_cheatsheet']
 ```
@@ -668,14 +668,14 @@ The agent calls `web_search` during reconnaissance to look up:
 ### Via interactive REPL
 
 ```
-cyber-sentry> /report
+dexter-ai> /report
 [+] Report saved to: loot/report_20240301_143022.md
 ```
 
 ### Via one-shot mode
 
 ```bash
-python -m cyber_sentry.cli run \
+python -m dexter_ai.cli run \
     -t 192.168.1.10 \
     --playbook web_pentest \
     --report
@@ -688,7 +688,7 @@ After an assessment completes, scroll down to **Export Report** and click **📥
 ### Report format
 
 ```markdown
-# Cyber-Sentry AI – Penetration Test Report
+# Dexter AI Pentest – Penetration Test Report
 
 **Target:** 192.168.1.10
 **Generated:** 2024-03-01 14:30:22
@@ -765,12 +765,12 @@ docker compose up
 
 ### Streamlit "ModuleNotFoundError" on start
 
-Ensure you ran `pip install -e "."` from the **repo root** (not inside `cyber_sentry/`):
+Ensure you ran `pip install -e "."` from the **repo root** (not inside `dexter_ai/`):
 
 ```bash
 cd super-duper-garbanzo    # repo root
 pip install -e "."
-streamlit run cyber_sentry/app.py
+streamlit run dexter_ai/app.py
 ```
 
 ### Docker: port already in use
@@ -787,7 +787,7 @@ STREAMLIT_PORT=8502 docker compose up
 ### LLM gives poor results / seems to hallucinate plans
 
 1. Try a larger model: `ollama pull llama3:70b` or switch to OpenRouter with `meta-llama/llama-3.1-70b-instruct`
-2. Add context to the knowledge base (`cyber_sentry/knowledge/sources/`)
+2. Add context to the knowledge base (`dexter_ai/knowledge/sources/`)
 3. Use a specific playbook instead of a free-form task
 
 ### Tests fail
@@ -803,7 +803,7 @@ Expected: `56 passed in X.XXs` — no LLM, no network access needed for tests.
 
 ## 17. FAQ
 
-**Q: Does Cyber-Sentry require an internet connection?**
+**Q: Does Dexter AI Pentest require an internet connection?**
 A: No — if you use Ollama with a downloaded model and your targets are on a local network, everything works fully offline. The web search tool is optional and falls back gracefully.
 
 **Q: Can I use a free LLM?**
@@ -820,11 +820,11 @@ A: The `OutputFilteringGuardrail` automatically redacts SSNs, credit card number
 **Q: Can I add my own tools?**
 A: Yes — three ways:
 1. **MCP server**: Expose any tool as an MCP server and add it to `mcp_servers.json`
-2. **Direct function**: Add a function to `cyber_sentry/tools/network_tools.py` and register it in `ToolRegistry`
+2. **Direct function**: Add a function to `dexter_ai/tools/network_tools.py` and register it in `ToolRegistry`
 3. **Playbook**: Reference the new tool name in a playbook step
 
 **Q: How do I change the default model?**
-A: Via CLI flag: `python -m cyber_sentry.cli --model mistral` or set in `.env`:
+A: Via CLI flag: `python -m dexter_ai.cli --model mistral` or set in `.env`:
 ```dotenv
 LLM_PROVIDER=ollama
 ```
@@ -861,11 +861,11 @@ ollama pull llama3      # If using Ollama
 
 # Run (pick one)
 make run                         # Streamlit UI → http://localhost:8501
-python -m cyber_sentry.cli       # Interactive CLI
+python -m dexter_ai.cli       # Interactive CLI
 docker compose up                # Docker (all tools pre-installed)
 
 # One-shot assessment
-python -m cyber_sentry.cli run -t 192.168.1.1 --playbook recon --report
+python -m dexter_ai.cli run -t 192.168.1.1 --playbook recon --report
 
 # Tests
 python -m pytest tests/ -v       # 56 tests, no LLM needed
@@ -873,4 +873,4 @@ python -m pytest tests/ -v       # 56 tests, no LLM needed
 
 ---
 
-*Cyber-Sentry AI is for educational and authorized security testing only. Always get written permission before scanning any target.*
+*Dexter AI Pentest is for educational and authorized security testing only. Always get written permission before scanning any target.*

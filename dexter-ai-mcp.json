@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "dexter-ai": {
+      "command": "python3",
+      "args": [
+        "/path/to/dexter_ai_mcp.py"
+      ],
+      "description": "Dexter AI Pentest v2.0 – AI-Powered Red Team Pentesting Agent. Supports 151+ security tools, 12+ AI agents, 7 attack playbooks.",
+      "timeout": 300,
+      "alwaysAllow": []
+    }
+  }
+}
