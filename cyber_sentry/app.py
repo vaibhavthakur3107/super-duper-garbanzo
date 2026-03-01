@@ -122,8 +122,8 @@ st.markdown("""
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import run_pentest, get_llm
-from providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
+from cyber_sentry.main import run_pentest, get_llm
+from cyber_sentry.providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
 
 
 # ============================================================================
@@ -368,7 +368,7 @@ def main():
             st.error("Please enter a target")
         else:
             # Check scope
-            from guardrails.scope_validator import validate_scope
+            from cyber_sentry.guardrails.scope_validator import validate_scope
             if not validate_scope(target):
                 st.error(f"Target '{target}' is not in the authorized scope!")
                 st.info("Add the target to the Authorized Scopes in the sidebar")

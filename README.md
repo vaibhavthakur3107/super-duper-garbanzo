@@ -8,6 +8,8 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-passing-brightgreen)](tests/)
 
+📖 **[→ Complete Beginner's Setup & Usage Guide (GUIDE.md)](GUIDE.md)**
+
 ---
 
 ## 📖 Overview
