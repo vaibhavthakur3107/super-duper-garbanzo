@@ -59,7 +59,7 @@ def sanitize_command(command: str) -> Tuple[bool, str]:
         'cloud_enum',
         # API Security
         'graphql-cop', 'newman', 'restler', 'swagger-cli',
-        'oauth-tester', 'cors-scanner', 'graphql-cop',
+        'oauth-tester', 'cors-scanner',
         'rate-limit-tester', 'wsdl-analyzer', 'grpc_cli',
         # Wireless Security
         'aircrack-ng', 'wifite', 'kismet', 'bettercap', 'reaver',
