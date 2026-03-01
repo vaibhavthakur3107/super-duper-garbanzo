@@ -100,7 +100,7 @@ function App() {
       <header className="header">
         <div className="logo">
           <Shield className="logo-icon" />
-          <span className="logo-text">Cyber-Sentry AI</span>
+          <span className="logo-text">Dexter AI Pentest</span>
         </div>
         <div className="header-status">
           <span className="status-dot" />

@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "cyber-sentry": {
+    "dexter-ai": {
       "command": "python3",
       "args": [
-        "/path/to/cyber_sentry_mcp.py"
+        "/path/to/dexter_ai_mcp.py"
       ],
-      "description": "Cyber-Sentry AI v2.0 – AI Red Team Pentesting Agent (151+ tools, 12+ agents)",
+      "description": "Dexter AI Pentest v2.0 – AI Red Team Pentesting Agent (151+ tools, 12+ agents)",
       "timeout": 300,
       "alwaysAllow": []
     },
