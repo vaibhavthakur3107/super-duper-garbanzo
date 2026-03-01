@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 """
-Cyber-Sentry AI — MCP Server (Model Context Protocol)
+Dexter AI Pentest — MCP Server (Model Context Protocol)
 
-FastMCP-based MCP server that exposes Cyber-Sentry AI pentesting tools
+FastMCP-based MCP server that exposes Dexter AI Pentest pentesting tools
 to MCP-compatible AI clients such as Claude Desktop, Cursor, and VS Code
 Copilot — inspired by the HexStrike AI MCP architecture.
 
 Architecture:
-    cyber_sentry_mcp.py  ←  MCP stdio client (this file)
+    dexter_ai_mcp.py  ←  MCP stdio client (this file)
            ↕  JSON-RPC / stdio
     AI Client (Claude Desktop / Cursor / VS Code Copilot)
 
 Quick-start (no Docker required):
-    pip install -e "."                    # install Cyber-Sentry
+    pip install -e "."                    # install Dexter AI Pentest
     pip install "mcp[cli]>=1.0.0"        # install FastMCP SDK
-    python3 cyber_sentry_mcp.py          # start MCP server
+    python3 dexter_ai_mcp.py          # start MCP server
 
 Flags:
     --compact      Load only essential gateway tools (scope_check,
                    run_security_tool, system_status) — ideal for
                    lightweight / small-LLM setups.
-    --server URL   Optional upstream Cyber-Sentry API server URL.
+    --server URL   Optional upstream Dexter AI Pentest API server URL.
     --timeout N    Tool execution timeout in seconds (default: 300).
     --debug        Enable debug logging.
 
@@ -29,10 +29,10 @@ Claude Desktop integration:
 
     {
       "mcpServers": {
-        "cyber-sentry": {
+        "dexter-ai": {
           "command": "python3",
-          "args": ["/path/to/cyber_sentry_mcp.py"],
-          "description": "Cyber-Sentry AI v2.0 – AI Red Team Pentesting Agent",
+          "args": ["/path/to/dexter_ai_mcp.py"],
+          "description": "Dexter AI Pentest v2.0 – AI Red Team Pentesting Agent",
           "timeout": 300,
           "disabled": false
         }
@@ -48,10 +48,10 @@ VS Code Copilot integration:
     {
       "mcp": {
         "servers": {
-          "cyber-sentry": {
+          "dexter-ai": {
             "type": "stdio",
             "command": "python3",
-            "args": ["/path/to/cyber_sentry_mcp.py"]
+            "args": ["/path/to/dexter_ai_mcp.py"]
           }
         }
       }
@@ -81,7 +81,7 @@ if str(_SCRIPT_DIR) not in sys.path:
 # ---------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
-    format="[🛡️  Cyber-Sentry MCP] %(asctime)s [%(levelname)s] %(message)s",
+    format="[🛡️  Dexter AI Pentest MCP] %(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[logging.StreamHandler(sys.stderr)],
 )
@@ -89,21 +89,21 @@ logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  Lazy imports from Cyber-Sentry (only when a tool is actually called)
+#  Lazy imports from Dexter AI Pentest (only when a tool is actually called)
 # ═══════════════════════════════════════════════════════════════════════════
 
 def _get_version() -> str:
-    from cyber_sentry import __version__
+    from dexter_ai import __version__
     return __version__
 
 
 def _validate_scope(target: str) -> bool:
-    from cyber_sentry.guardrails.scope_validator import validate_scope
+    from dexter_ai.guardrails.scope_validator import validate_scope
     return validate_scope(target)
 
 
 def _get_scopes() -> list[str]:
-    from cyber_sentry.guardrails.scope_validator import get_authorized_scopes
+    from dexter_ai.guardrails.scope_validator import get_authorized_scopes
     return get_authorized_scopes()
 
 
@@ -116,7 +116,7 @@ def _run_tool(tool_name: str, command: str, target: str) -> dict:
                      f"Authorized: {', '.join(_get_scopes())}",
         }
     try:
-        from cyber_sentry.tools.network_tools import tool_registry
+        from dexter_ai.tools.network_tools import tool_registry
         func = tool_registry.get_tool(tool_name)
         if func is None:
             return {"success": False, "error": f"Unknown tool: {tool_name}"}
@@ -149,7 +149,7 @@ def register_gateway_tools(mcp):
 
     @mcp.tool()
     def run_security_tool(tool_name: str, target: str, command: str = "") -> str:
-        """Execute any of the 151+ Cyber-Sentry security tools by name.
+        """Execute any of the 151+ Dexter AI Pentest security tools by name.
 
         Use 'list_tools' first to discover available tools.
         Scope validation is enforced automatically.
@@ -169,15 +169,15 @@ def register_gateway_tools(mcp):
 
     @mcp.tool()
     def system_status() -> str:
-        """Show Cyber-Sentry AI system status: version, tool count, scopes, notes."""
-        from cyber_sentry.tools.network_tools import tool_registry
-        from cyber_sentry.notes import NotesManager
-        from cyber_sentry.cli import list_playbooks
+        """Show Dexter AI Pentest system status: version, tool count, scopes, notes."""
+        from dexter_ai.tools.network_tools import tool_registry
+        from dexter_ai.notes import NotesManager
+        from dexter_ai.cli import list_playbooks
 
         tools = tool_registry.list_tools()
         notes = NotesManager()
         return json.dumps({
-            "name": "Cyber-Sentry AI",
+            "name": "Dexter AI Pentest",
             "version": _get_version(),
             "tools_count": len(tools),
             "playbooks": list_playbooks(),
@@ -320,7 +320,7 @@ def register_web_analysis_tools(mcp):
         Args:
             url: Full URL to analyze (e.g. http://example.com)
         """
-        from cyber_sentry.browser_agent import BrowserAgent
+        from dexter_ai.browser_agent import BrowserAgent
         agent = BrowserAgent()
         try:
             result = agent.analyze_security_headers(url)
@@ -335,7 +335,7 @@ def register_web_analysis_tools(mcp):
         Args:
             url: Full URL to fingerprint
         """
-        from cyber_sentry.browser_agent import BrowserAgent
+        from dexter_ai.browser_agent import BrowserAgent
         agent = BrowserAgent()
         try:
             result = agent.detect_technologies(url)
@@ -350,7 +350,7 @@ def register_web_analysis_tools(mcp):
         Args:
             url: Full URL to crawl for forms
         """
-        from cyber_sentry.browser_agent import BrowserAgent
+        from dexter_ai.browser_agent import BrowserAgent
         agent = BrowserAgent()
         try:
             result = agent.find_forms(url)
@@ -365,7 +365,7 @@ def register_web_analysis_tools(mcp):
         Args:
             url: Full URL to test
         """
-        from cyber_sentry.browser_agent import BrowserAgent
+        from dexter_ai.browser_agent import BrowserAgent
         agent = BrowserAgent()
         try:
             result = agent.check_cors(url)
@@ -384,7 +384,7 @@ def register_intel_tools(mcp):
         Args:
             cve_id: CVE identifier (e.g. CVE-2024-1234)
         """
-        from cyber_sentry.cve_intel import CVEIntelligence
+        from dexter_ai.cve_intel import CVEIntelligence
         intel = CVEIntelligence()
         result = intel.lookup(cve_id)
         if result is None:
@@ -398,7 +398,7 @@ def register_intel_tools(mcp):
         Args:
             query: Search keyword (e.g. 'apache', 'rce', 'log4j')
         """
-        from cyber_sentry.cve_intel import CVEIntelligence
+        from dexter_ai.cve_intel import CVEIntelligence
         intel = CVEIntelligence()
         results = intel.search(query)
         if not results:
@@ -418,7 +418,7 @@ def register_notes_tools(mcp):
             category: One of: finding, vulnerability, credential, artifact
             target: Related target host (optional)
         """
-        from cyber_sentry.notes import NotesManager
+        from dexter_ai.notes import NotesManager
         notes = NotesManager()
         note = notes.add_note(content=content, category=category,
                               target=target, source="mcp")
@@ -432,7 +432,7 @@ def register_notes_tools(mcp):
             category: Filter by category (finding, vulnerability, credential, artifact)
             target: Filter by target host
         """
-        from cyber_sentry.notes import NotesManager
+        from dexter_ai.notes import NotesManager
         notes = NotesManager()
         result = notes.get_notes(
             category=category or None,
@@ -448,13 +448,13 @@ def register_discovery_tools(mcp):
 
     @mcp.tool()
     def list_tools() -> str:
-        """List all 151+ security tools available in Cyber-Sentry AI, grouped by category."""
-        from cyber_sentry.tools.network_tools import tool_registry
+        """List all 151+ security tools available in Dexter AI Pentest, grouped by category."""
+        from dexter_ai.tools.network_tools import tool_registry
         tools = tool_registry.list_tools()
         categories: dict[str, list] = {}
         for t in tools:
             categories.setdefault(t["category"], []).append(t)
-        lines = [f"Cyber-Sentry AI — {len(tools)} tools across {len(categories)} categories\n"]
+        lines = [f"Dexter AI Pentest — {len(tools)} tools across {len(categories)} categories\n"]
         for cat in sorted(categories):
             lines.append(f"\n[{cat.upper()}]")
             for t in categories[cat]:
@@ -464,7 +464,7 @@ def register_discovery_tools(mcp):
     @mcp.tool()
     def list_playbooks() -> str:
         """List available attack playbooks (pre-built security workflows)."""
-        from cyber_sentry.cli import list_playbooks as _list_pb, load_playbook
+        from dexter_ai.cli import list_playbooks as _list_pb, load_playbook
         names = _list_pb()
         if not names:
             return "No playbooks found."
@@ -491,7 +491,7 @@ def setup_mcp_server(compact: bool = False):
     """
     from mcp.server.fastmcp import FastMCP
 
-    mcp = FastMCP("cyber-sentry-ai")
+    mcp = FastMCP("dexter-ai-pentest")
 
     # Always register gateway tools
     register_gateway_tools(mcp)
@@ -519,13 +519,13 @@ def setup_mcp_server(compact: bool = False):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Cyber-Sentry AI — MCP Server for AI Client Integration",
+        description="Dexter AI Pentest — MCP Server for AI Client Integration",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
     parser.add_argument(
         "--server", type=str, default=None,
-        help="Optional upstream Cyber-Sentry API server URL "
+        help="Optional upstream Dexter AI Pentest API server URL "
              "(e.g. http://localhost:8000)",
     )
     parser.add_argument(
@@ -561,19 +561,19 @@ def main():
 
     # Store server URL for tools that need it
     if args.server:
-        os.environ["CYBER_SENTRY_SERVER"] = args.server
+        os.environ["DEXTER_AI_SERVER"] = args.server
         logger.info(f"🔗 Upstream server: {args.server}")
 
     if args.timeout != 300:
-        os.environ["CYBER_SENTRY_TIMEOUT"] = str(args.timeout)
+        os.environ["DEXTER_AI_TIMEOUT"] = str(args.timeout)
 
-    logger.info(f"🚀 Starting Cyber-Sentry AI MCP Server v{_get_version()}")
+    logger.info(f"🚀 Starting Dexter AI Pentest MCP Server v{_get_version()}")
 
     if args.list_tools:
         mcp = setup_mcp_server(compact=args.compact)
         # FastMCP doesn't have a direct list method; just print the registered info
         mode = "compact" if args.compact else "full"
-        print(f"Cyber-Sentry AI MCP Server — {mode} mode")
+        print(f"Dexter AI Pentest MCP Server — {mode} mode")
         print(f"Version: {_get_version()}\n")
         print("Registered MCP tools:")
         # Print the tool names from the categories we registered

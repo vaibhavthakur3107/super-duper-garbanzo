@@ -1,12 +1,12 @@
 """
-Cyber-Sentry AI – MCP (Model Context Protocol) Client
+Dexter AI Pentest – MCP (Model Context Protocol) Client
 Manages connections to external MCP tool servers.
 
 Inspired by PentestAgent's MCP integration:
   https://github.com/GH05TCREW/pentestagent
 
 MCP servers expose tools via a standardised JSON protocol, allowing
-Cyber-Sentry to call external tools (nmap MCP, Metasploit MCP, Burp Suite
+Dexter AI Pentest to call external tools (nmap MCP, Metasploit MCP, Burp Suite
 extensions, custom tool servers, etc.) transparently alongside built-in tools.
 """
 
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # Default config file locations
 _DEFAULT_CONFIG_PATHS = [
     Path("mcp_servers.json"),
-    Path.home() / ".config" / "cyber-sentry" / "mcp_servers.json",
+    Path.home() / ".config" / "dexter-ai" / "mcp_servers.json",
 ]
 
 
@@ -63,7 +63,7 @@ class MCPClient:
     Manages MCP server configurations and provides a tool-call interface.
 
     MCP servers are external processes that speak the Model Context Protocol
-    (a JSON-RPC variant).  Cyber-Sentry uses a lightweight subprocess-based
+    (a JSON-RPC variant).  Dexter AI Pentest uses a lightweight subprocess-based
     client that:
       1. Loads server configs from ``mcp_servers.json``
       2. Verifies that server commands exist on ``PATH``

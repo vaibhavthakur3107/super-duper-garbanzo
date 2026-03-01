@@ -1,5 +1,5 @@
 """
-Cyber-Sentry AI – Notes / Loot Manager
+Dexter AI Pentest – Notes / Loot Manager
 Saves findings, credentials, and vulnerabilities discovered during assessments.
 Inspired by PentestAgent's loot/notes system.
 """
@@ -97,7 +97,7 @@ class NotesManager:
         report_path = self.loot_dir / f"report_{timestamp}.md"
 
         lines = [
-            "# Cyber-Sentry AI – Penetration Test Report",
+            "# Dexter AI Pentest – Penetration Test Report",
             "",
             f"**Target:** {target or 'N/A'}",
             f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",

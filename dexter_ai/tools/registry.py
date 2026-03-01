@@ -1,6 +1,6 @@
 """
 Tool Registry and Integrations
-Manages all available tools for the Cyber-Sentry agents
+Manages all available tools for the Dexter AI Pentest agents
 """
 
 import asyncio

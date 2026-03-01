@@ -1,4 +1,4 @@
-# 🛡️ Cyber-Sentry AI
+# 🛡️ Dexter AI Pentest
 
 A production-ready autonomous Red Team Pentesting Agent built with LangGraph, Streamlit, and your choice of LLM provider.
 
@@ -15,7 +15,7 @@ A production-ready autonomous Red Team Pentesting Agent built with LangGraph, St
 
 ## 🎯 Overview
 
-Cyber-Sentry is a multi-agent pentesting system that uses:
+Dexter AI Pentest is a multi-agent pentesting system that uses:
 - **LangGraph** for agent orchestration with state machine architecture
 - **Ollama** (Llama3/Mistral) for local LLM inference, **or** cloud providers:
   - **OpenAI** (GPT-4o, GPT-4-turbo, …)
@@ -33,7 +33,7 @@ Cyber-Sentry is a multi-agent pentesting system that uses:
 ## 📂 Project Structure
 
 ```
-cyber_sentry/
+dexter_ai/
 ├── main.py                    # LangGraph state machine
 ├── providers.py               # LLM provider constants & factory (no heavy deps)
 ├── cli.py                     # Interactive CLI entry point
@@ -115,34 +115,34 @@ cd super-duper-garbanzo
 python3 -m venv venv
 source venv/bin/activate
 
-pip install -r cyber_sentry/requirements.txt
+pip install -r dexter_ai/requirements.txt
 # Optional cloud providers:
 pip install langchain-openai      # for OpenAI or OpenRouter
 pip install langchain-anthropic   # for Anthropic
 
 cp .env.example .env   # then edit with your keys
-streamlit run cyber_sentry/app.py
+streamlit run dexter_ai/app.py
 ```
 
 ## 🖥️ CLI Usage
 
-Cyber-Sentry ships a `cyber-sentry` interactive CLI similar to PentestAgent:
+Dexter AI Pentest ships a `dexter-ai` interactive CLI similar to PentestAgent:
 
 ```bash
 # Interactive REPL (default)
-python -m cyber_sentry.cli
+python -m dexter_ai.cli
 
 # With target preset
-python -m cyber_sentry.cli -t 192.168.1.1
+python -m dexter_ai.cli -t 192.168.1.1
 
 # One-shot non-interactive run
-python -m cyber_sentry.cli run -t example.com --playbook web_pentest --report
+python -m dexter_ai.cli run -t example.com --playbook web_pentest --report
 
 # List available playbooks
-python -m cyber_sentry.cli playbooks
+python -m dexter_ai.cli playbooks
 
 # Show saved notes/loot
-python -m cyber_sentry.cli notes
+python -m dexter_ai.cli notes
 ```
 
 ### CLI Commands (interactive mode)
@@ -173,7 +173,7 @@ Prebuilt attack playbooks for structured, repeatable assessments (like PentestAg
 
 ```bash
 # Run a playbook
-python -m cyber_sentry.cli run -t example.com --playbook web_pentest --report
+python -m dexter_ai.cli run -t example.com --playbook web_pentest --report
 ```
 
 ## 🐳 Docker
@@ -261,7 +261,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 # Get your key at https://openrouter.ai/keys
 export OPENROUTER_API_KEY="sk-or-..."
 export OPENROUTER_SITE_URL="https://yoursite.com"   # optional, shown in OR dashboard
-export OPENROUTER_APP_TITLE="Cyber-Sentry AI"       # optional, shown in OR dashboard
+export OPENROUTER_APP_TITLE="Dexter AI Pentest"       # optional, shown in OR dashboard
 
 # Set authorized scopes (comma-separated)
 export AUTHORIZED_SCOPES="example.com,test.local,127.0.0.1,localhost"
@@ -273,7 +273,7 @@ Edit `guardrails/scope_validator.py` or use the sidebar in the UI to configure a
 
 ## 🔌 LLM Providers
 
-Cyber-Sentry supports four LLM backends. The active provider is chosen automatically from
+Dexter AI Pentest supports four LLM backends. The active provider is chosen automatically from
 available API keys, or you can set `LLM_PROVIDER` explicitly.
 
 | Provider | Env Variable | Default Model | Notes |
@@ -296,7 +296,7 @@ export OPENROUTER_API_KEY="sk-or-..."
 # 2. Install the required package (same as for OpenAI)
 pip install langchain-openai
 
-# 3. Run Cyber-Sentry – it will auto-detect OpenRouter
+# 3. Run Dexter AI Pentest – it will auto-detect OpenRouter
 streamlit run app.py
 
 # Or set the provider and model explicitly
@@ -371,12 +371,12 @@ python -m pytest tests/ -v
 
 ### Adding New Playbooks
 
-1. Create `cyber_sentry/playbooks/<name>.yaml` following the existing format
+1. Create `dexter_ai/playbooks/<name>.yaml` following the existing format
 2. The playbook is immediately available via `/playbook <name>` in the CLI and `--playbook <name>` flag
 
 ## 📊 Comparison with Similar Projects
 
-| Feature | Cyber-Sentry | PentestGPT | PentestAgent | Pentagi |
+| Feature | Dexter AI Pentest | PentestGPT | PentestAgent | Pentagi |
 |---|:---:|:---:|:---:|:---:|
 | Multi-LLM (Ollama/OpenAI/Anthropic/OpenRouter) | ✅ | ✅ | ✅ | ✅ |
 | Docker-first deployment | ✅ | ✅ | ✅ | ✅ |
@@ -396,14 +396,14 @@ python -m pytest tests/ -v
 
 ## 🧩 MCP (Model Context Protocol)
 
-Cyber-Sentry can connect to any MCP-compatible tool server, including nmap MCP, Burp Suite MCP, Metasploit MCP, and custom servers.
+Dexter AI Pentest can connect to any MCP-compatible tool server, including nmap MCP, Burp Suite MCP, Metasploit MCP, and custom servers.
 
 ```bash
 # 1. Copy and edit the example config
 cp mcp_servers.json.example mcp_servers.json
 
 # 2. Add a server via CLI
-python -m cyber_sentry.cli mcp add nmap npx -y gc-nmap-mcp
+python -m dexter_ai.cli mcp add nmap npx -y gc-nmap-mcp
 
 # 3. In interactive mode
 /mcp list               # show configured servers
@@ -429,13 +429,13 @@ python -m cyber_sentry.cli mcp add nmap npx -y gc-nmap-mcp
 ## 🧠 Knowledge Base
 
 Place domain knowledge, pentest methodologies, CVE notes, or wordlists under
-`cyber_sentry/knowledge/sources/` as `.md` or `.txt` files.
+`dexter_ai/knowledge/sources/` as `.md` or `.txt` files.
 They are injected into agent prompts at runtime.
 
 ```bash
 # Example
 echo "# SQL Injection Cheatsheet\n' OR 1=1 --" \
-    > cyber_sentry/knowledge/sources/sqli.md
+    > dexter_ai/knowledge/sources/sqli.md
 ```
 
 Two built-in sources are provided: `web_methodology.md` and `network_methodology.md`.

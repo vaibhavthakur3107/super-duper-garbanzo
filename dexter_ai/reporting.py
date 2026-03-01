@@ -401,7 +401,7 @@ class ReportGenerator:
 
         # Title
         lines.extend([
-            "# 🛡️ Cyber-Sentry AI — Penetration Test Report",
+            "# 🛡️ Dexter AI Pentest — Penetration Test Report",
             "",
             f"**Target:** `{target or 'N/A'}`  ",
             f"**Generated:** {timestamp}  ",

@@ -1,5 +1,5 @@
 """
-Cyber-Sentry AI – LLM Provider constants and factory.
+Dexter AI Pentest – LLM Provider constants and factory.
 
 Separated from main.py so the CLI, tests, and other modules can import
 provider names without pulling in the full LangGraph / LangChain stack.
@@ -75,7 +75,7 @@ def get_llm(model: str = "llama3", temperature: float = 0.7, provider: str = Non
                     "OPENROUTER_SITE_URL",
                     "https://github.com/vaibhavthakur3107/super-duper-garbanzo",
                 ),
-                "X-Title": os.environ.get("OPENROUTER_APP_TITLE", "Cyber-Sentry AI"),
+                "X-Title": os.environ.get("OPENROUTER_APP_TITLE", "Dexter AI Pentest"),
             },
         )
 

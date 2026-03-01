@@ -47,7 +47,7 @@ def _fetch_url(url: str, timeout: int = 15) -> tuple[bytes, dict[str, str]]:
     """Fetch a URL using only the standard library.  Returns (body, headers)."""
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "CyberSentry-BrowserAgent/1.0"},
+        headers={"User-Agent": "DexterAI-BrowserAgent/1.0"},
     )
     resp = urllib.request.urlopen(req, timeout=timeout)  # noqa: S310
     headers = {k.lower(): v for k, v in resp.headers.items()}
@@ -261,7 +261,7 @@ class BrowserAgent:
         req = urllib.request.Request(
             url,
             headers={
-                "User-Agent": "CyberSentry-BrowserAgent/1.0",
+                "User-Agent": "DexterAI-BrowserAgent/1.0",
                 "Origin": test_origin,
             },
         )

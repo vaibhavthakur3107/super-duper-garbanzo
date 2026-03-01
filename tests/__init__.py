@@ -1,5 +1,5 @@
 """
-Tests for Cyber-Sentry AI core components.
+Tests for Dexter AI Pentest core components.
 Run with:  python -m pytest tests/ -v
 """
 import pytest

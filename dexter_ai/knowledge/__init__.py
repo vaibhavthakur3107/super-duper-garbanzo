@@ -1,10 +1,10 @@
 """
-Cyber-Sentry AI – Knowledge Base
+Dexter AI Pentest – Knowledge Base
 Provides context injection from local knowledge sources.
 
 Inspired by PentestAgent's RAG/knowledge system.
 Place methodology notes, CVE references, or wordlists under:
-    cyber_sentry/knowledge/sources/
+    dexter_ai/knowledge/sources/
 
 Files are loaded at runtime and injected into the agent context.
 """

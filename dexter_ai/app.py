@@ -1,5 +1,5 @@
 """
-Cyber-Sentry AI - Streamlit Frontend
+Dexter AI Pentest - Streamlit Frontend
 Thought Trace Visualizer for the Pentesting Agent
 """
 
@@ -13,7 +13,7 @@ from typing import Optional
 
 # Configure page
 st.set_page_config(
-    page_title="Cyber-Sentry AI",
+    page_title="Dexter AI Pentest",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -122,8 +122,8 @@ st.markdown("""
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cyber_sentry.main import run_pentest, get_llm
-from cyber_sentry.providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
+from dexter_ai.main import run_pentest, get_llm
+from dexter_ai.providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
 
 
 # ============================================================================
@@ -236,7 +236,7 @@ def display_tool_result(result: dict):
 def render_sidebar():
     """Render the sidebar with settings and info"""
     with st.sidebar:
-        st.title("🛡️ Cyber-Sentry")
+        st.title("🛡️ Dexter AI Pentest")
         
         st.divider()
         
@@ -307,7 +307,7 @@ def render_sidebar():
         
         # About
         st.caption("""
-        **Cyber-Sentry AI** v1.0.0
+        **Dexter AI Pentest** v1.0.0
         
         Red Team Pentesting Agent
         Built with LangGraph + Ollama/OpenAI/Anthropic/OpenRouter
@@ -326,7 +326,7 @@ def main():
     model, provider, scopes = render_sidebar()
     
     # Main content area
-    st.title("🛡️ Cyber-Sentry AI")
+    st.title("🛡️ Dexter AI Pentest")
     st.markdown("### Red Team Pentesting Agent")
     
     # Task input section
@@ -368,7 +368,7 @@ def main():
             st.error("Please enter a target")
         else:
             # Check scope
-            from cyber_sentry.guardrails.scope_validator import validate_scope
+            from dexter_ai.guardrails.scope_validator import validate_scope
             if not validate_scope(target):
                 st.error(f"Target '{target}' is not in the authorized scope!")
                 st.info("Add the target to the Authorized Scopes in the sidebar")
@@ -516,7 +516,7 @@ def main():
         
         if st.button("📥 Generate Markdown Report"):
             report_lines = [
-                "# Cyber-Sentry AI – Penetration Test Report",
+                "# Dexter AI Pentest – Penetration Test Report",
                 "",
                 f"**Session:** {st.session_state.current_session or 'N/A'}",
                 f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
@@ -540,7 +540,7 @@ def main():
             st.download_button(
                 label="⬇️ Download report.md",
                 data=report_md,
-                file_name="cyber_sentry_report.md",
+                file_name="dexter_ai_report.md",
                 mime="text/markdown",
             )
             with st.expander("Preview Report"):

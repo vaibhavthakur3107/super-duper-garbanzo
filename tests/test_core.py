@@ -1,5 +1,5 @@
 """
-Core tests for Cyber-Sentry AI.
+Core tests for Dexter AI Pentest.
 Tests scope validation, notes manager, playbooks, LLM provider constants,
 and CLI helpers – all without requiring live network access or an LLM.
 """
@@ -8,16 +8,16 @@ import json
 import pytest
 from pathlib import Path
 
-from cyber_sentry.guardrails.scope_validator import validate_scope
-from cyber_sentry.notes import NotesManager
-from cyber_sentry.providers import (
+from dexter_ai.guardrails.scope_validator import validate_scope
+from dexter_ai.notes import NotesManager
+from dexter_ai.providers import (
     PROVIDER_OLLAMA,
     PROVIDER_OPENAI,
     PROVIDER_ANTHROPIC,
     PROVIDER_OPENROUTER,
     OPENROUTER_BASE_URL,
 )
-from cyber_sentry.cli import list_playbooks, load_playbook
+from dexter_ai.cli import list_playbooks, load_playbook
 
 
 # ── Scope Validator ───────────────────────────────────────────────────────────
@@ -196,18 +196,18 @@ class TestNetworkToolHelpers:
     """Tests for output parsers in network_tools.py"""
 
     def test_extract_ports(self):
-        from cyber_sentry.tools.network_tools import extract_ports
+        from dexter_ai.tools.network_tools import extract_ports
         sample = "80/tcp   open  http\n443/tcp  open  https\n22/tcp   open  ssh"
         ports = extract_ports(sample)
         assert len(ports) == 3
         assert any(p["port"] == 80 and p["service"] == "http" for p in ports)
 
     def test_extract_ports_empty(self):
-        from cyber_sentry.tools.network_tools import extract_ports
+        from dexter_ai.tools.network_tools import extract_ports
         assert extract_ports("No ports found") == []
 
     def test_extract_cves(self):
-        from cyber_sentry.tools.network_tools import extract_cves
+        from dexter_ai.tools.network_tools import extract_cves
         sample = "[CVE-2024-1234] High severity\n[CVE-2023-5678] Medium\n[CVE-2024-1234] duplicate"
         cves = extract_cves(sample)
         assert "CVE-2024-1234" in cves
@@ -215,7 +215,7 @@ class TestNetworkToolHelpers:
         assert len(cves) == 2  # deduped
 
     def test_extract_urls(self):
-        from cyber_sentry.tools.network_tools import extract_urls
+        from dexter_ai.tools.network_tools import extract_urls
         sample = "/admin (Status: 200)\n/login (Status: 301)\n/secret (Status: 403)"
         urls = extract_urls(sample)
         paths = [u["path"] for u in urls]
@@ -224,19 +224,19 @@ class TestNetworkToolHelpers:
         assert "/secret" in paths
 
     def test_sanitize_command_blocks_rm_rf(self):
-        from cyber_sentry.tools.network_tools import sanitize_command
+        from dexter_ai.tools.network_tools import sanitize_command
         ok, err = sanitize_command("nmap -sV target; rm -rf /")
         assert ok is False
         assert "Dangerous" in err
 
     def test_sanitize_command_allows_nmap(self):
-        from cyber_sentry.tools.network_tools import sanitize_command
+        from dexter_ai.tools.network_tools import sanitize_command
         ok, err = sanitize_command("nmap -sV -sC -T4 example.com")
         assert ok is True
         assert err == ""
 
     def test_web_search_in_registry(self):
-        from cyber_sentry.tools.network_tools import tool_registry
+        from dexter_ai.tools.network_tools import tool_registry
         names = [t["name"] for t in tool_registry.list_tools()]
         assert "web_search" in names
 
@@ -248,7 +248,7 @@ class TestMCPClient:
 
     @pytest.fixture
     def mcp(self, tmp_path):
-        from cyber_sentry.mcp import MCPClient
+        from dexter_ai.mcp import MCPClient
         return MCPClient(config_path=tmp_path / "mcp_servers.json")
 
     def test_list_empty_initially(self, mcp):
@@ -286,7 +286,7 @@ class TestMCPClient:
         assert mcp.remove_server("nonexistent") is False
 
     def test_persisted_to_disk(self, tmp_path):
-        from cyber_sentry.mcp import MCPClient
+        from dexter_ai.mcp import MCPClient
         mcp1 = MCPClient(config_path=tmp_path / "mcp.json")
         mcp1.add_server("nmap", "npx", description="test")
         # Load fresh instance
@@ -308,7 +308,7 @@ class TestMCPClient:
     def test_load_from_example_format(self, tmp_path):
         """Verify the example JSON format loads correctly."""
         import json
-        from cyber_sentry.mcp import MCPClient
+        from dexter_ai.mcp import MCPClient
         config = {
             "mcpServers": {
                 "nmap": {
@@ -335,7 +335,7 @@ class TestKnowledgeBase:
 
     @pytest.fixture
     def kb(self, tmp_path):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         sources = tmp_path / "sources"
         sources.mkdir()
         (sources / "web.md").write_text("# Web Methodology\nAlways check OWASP Top 10.")
@@ -365,13 +365,13 @@ class TestKnowledgeBase:
         assert "OWASP" in ctx
 
     def test_get_context_empty_sources(self, tmp_path):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         kb = KnowledgeBase(sources_dir=tmp_path / "empty")
         assert kb.get_context() == ""
 
     def test_builtin_sources_loaded(self):
         """The built-in knowledge/sources/ directory should have at least one doc."""
-        from cyber_sentry.knowledge import knowledge_base
+        from dexter_ai.knowledge import knowledge_base
         knowledge_base.reload()
         assert len(knowledge_base.list_sources()) >= 1
 
@@ -383,7 +383,7 @@ class TestExpandedToolArsenal:
 
     @pytest.fixture
     def registry(self):
-        from cyber_sentry.tools.network_tools import ToolRegistry
+        from dexter_ai.tools.network_tools import ToolRegistry
         return ToolRegistry()
 
     def _names(self, registry):
@@ -547,39 +547,39 @@ class TestNewKnowledgeSources:
     """Tests for the 3 new knowledge source files."""
 
     def test_builtin_sources_at_least_5(self):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         kb = KnowledgeBase()
         assert len(kb.list_sources()) >= 5
 
     def test_osint_source_loaded(self):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         kb = KnowledgeBase()
         assert "osint_bugbounty_methodology" in kb.list_sources()
 
     def test_cloud_source_loaded(self):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         kb = KnowledgeBase()
         assert "cloud_security_methodology" in kb.list_sources()
 
     def test_binary_source_loaded(self):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         kb = KnowledgeBase()
         assert "binary_forensics_methodology" in kb.list_sources()
 
     def test_osint_context_contains_amass(self):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         kb = KnowledgeBase()
         ctx = kb.get_context("osint subdomain")
         assert "amass" in ctx.lower()
 
     def test_cloud_context_contains_aws(self):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         kb = KnowledgeBase()
         ctx = kb.get_context("aws cloud")
         assert "aws" in ctx.lower()
 
     def test_binary_context_contains_gdb(self):
-        from cyber_sentry.knowledge import KnowledgeBase
+        from dexter_ai.knowledge import KnowledgeBase
         kb = KnowledgeBase()
         ctx = kb.get_context("gdb binary")
         assert "gdb" in ctx.lower()
@@ -592,7 +592,7 @@ class TestExpandedToolArsenal151:
 
     @pytest.fixture
     def registry(self):
-        from cyber_sentry.tools.network_tools import ToolRegistry
+        from dexter_ai.tools.network_tools import ToolRegistry
         return ToolRegistry()
 
     def _names(self, registry):
@@ -655,19 +655,19 @@ class TestSmartCache:
     """Tests for the smart caching system."""
 
     def test_set_and_get(self):
-        from cyber_sentry.cache import SmartCache
+        from dexter_ai.cache import SmartCache
         c = SmartCache(max_size=10)
         c.set("key1", "value1")
         assert c.get("key1") == "value1"
 
     def test_get_missing_returns_none(self):
-        from cyber_sentry.cache import SmartCache
+        from dexter_ai.cache import SmartCache
         c = SmartCache(max_size=10)
         assert c.get("nonexistent") is None
 
     def test_ttl_expiry(self):
         import time
-        from cyber_sentry.cache import SmartCache
+        from dexter_ai.cache import SmartCache
         c = SmartCache(max_size=10)
         c.set("expiring", "data", ttl=0.1)
         assert c.get("expiring") == "data"
@@ -675,7 +675,7 @@ class TestSmartCache:
         assert c.get("expiring") is None
 
     def test_lru_eviction(self):
-        from cyber_sentry.cache import SmartCache
+        from dexter_ai.cache import SmartCache
         c = SmartCache(max_size=3)
         c.set("a", 1)
         c.set("b", 2)
@@ -685,7 +685,7 @@ class TestSmartCache:
         assert c.get("d") == 4
 
     def test_stats_tracking(self):
-        from cyber_sentry.cache import SmartCache
+        from dexter_ai.cache import SmartCache
         c = SmartCache(max_size=10)
         c.set("x", 1)
         c.get("x")      # hit
@@ -696,14 +696,14 @@ class TestSmartCache:
         assert stats["hit_rate"] == 0.5
 
     def test_invalidate(self):
-        from cyber_sentry.cache import SmartCache
+        from dexter_ai.cache import SmartCache
         c = SmartCache(max_size=10)
         c.set("k", "v")
         c.invalidate("k")
         assert c.get("k") is None
 
     def test_clear(self):
-        from cyber_sentry.cache import SmartCache
+        from dexter_ai.cache import SmartCache
         c = SmartCache(max_size=10)
         c.set("a", 1)
         c.set("b", 2)
@@ -718,34 +718,34 @@ class TestCVEIntelligence:
     """Tests for the CVE intelligence manager."""
 
     def test_preloaded_database(self):
-        from cyber_sentry.cve_intel import cve_intelligence
+        from dexter_ai.cve_intel import cve_intelligence
         assert len(cve_intelligence._db) >= 5
 
     def test_lookup_known_cve(self):
-        from cyber_sentry.cve_intel import cve_intelligence
+        from dexter_ai.cve_intel import cve_intelligence
         entry = cve_intelligence.lookup_cve("CVE-2021-44228")
         assert entry is not None
         assert entry.cve_id == "CVE-2021-44228"
 
     def test_lookup_unknown_returns_none(self):
-        from cyber_sentry.cve_intel import cve_intelligence
+        from dexter_ai.cve_intel import cve_intelligence
         assert cve_intelligence.lookup_cve("CVE-9999-99999") is None
 
     def test_search_cve(self):
-        from cyber_sentry.cve_intel import cve_intelligence
+        from dexter_ai.cve_intel import cve_intelligence
         results = cve_intelligence.search_cve("apache")
         assert len(results) > 0
 
     def test_get_critical_cves(self):
-        from cyber_sentry.cve_intel import cve_intelligence
+        from dexter_ai.cve_intel import cve_intelligence
         crits = cve_intelligence.get_critical_cves()
         assert len(crits) > 0
-        from cyber_sentry.cve_intel import Severity
+        from dexter_ai.cve_intel import Severity
         for c in crits:
             assert c.severity == Severity.CRITICAL
 
     def test_generate_advisory(self):
-        from cyber_sentry.cve_intel import cve_intelligence
+        from dexter_ai.cve_intel import cve_intelligence
         crits = cve_intelligence.get_critical_cves()
         advisory = cve_intelligence.generate_advisory(crits[:2])
         assert len(advisory) > 0
@@ -758,19 +758,19 @@ class TestProcessManager:
     """Tests for the process manager."""
 
     def test_stats_initial(self):
-        from cyber_sentry.process_manager import ProcessManager
+        from dexter_ai.process_manager import ProcessManager
         pm = ProcessManager()
         stats = pm.get_stats()
         assert stats["total"] == 0
         assert stats["running"] == 0
 
     def test_list_processes_empty(self):
-        from cyber_sentry.process_manager import ProcessManager
+        from dexter_ai.process_manager import ProcessManager
         pm = ProcessManager()
         assert pm.list_processes() == []
 
     def test_start_simple_process(self):
-        from cyber_sentry.process_manager import ProcessManager
+        from dexter_ai.process_manager import ProcessManager
         pm = ProcessManager()
         proc = pm.start_process("echo hello", timeout=5)
         assert proc is not None
@@ -783,13 +783,13 @@ class TestBrowserAgent:
     """Tests for the browser agent."""
 
     def test_check_available(self):
-        from cyber_sentry.browser_agent import browser_agent
+        from dexter_ai.browser_agent import browser_agent
         # Should return bool without crashing
         result = browser_agent.check_available()
         assert isinstance(result, bool)
 
     def test_analyze_security_headers_structure(self):
-        from cyber_sentry.browser_agent import BrowserAgent
+        from dexter_ai.browser_agent import BrowserAgent
         ba = BrowserAgent()
         # Test the method exists and returns a dict (may fail on network)
         assert hasattr(ba, "analyze_security_headers")
@@ -804,17 +804,17 @@ class TestAIAgents:
     """Tests for the 12+ AI agent system."""
 
     def test_get_all_agents_returns_dict(self):
-        from cyber_sentry.agents.ai_agents import get_all_ai_agents
+        from dexter_ai.agents.ai_agents import get_all_ai_agents
         agents = get_all_ai_agents()
         assert isinstance(agents, dict)
 
     def test_at_least_12_agents(self):
-        from cyber_sentry.agents.ai_agents import get_all_ai_agents
+        from dexter_ai.agents.ai_agents import get_all_ai_agents
         agents = get_all_ai_agents()
         assert len(agents) >= 12
 
     def test_expected_agents_present(self):
-        from cyber_sentry.agents.ai_agents import get_all_ai_agents
+        from dexter_ai.agents.ai_agents import get_all_ai_agents
         agents = get_all_ai_agents()
         expected = [
             "IntelligentDecisionEngine",
@@ -834,7 +834,7 @@ class TestAIAgents:
             assert name in agents, f"Agent '{name}' not found"
 
     def test_agent_descriptions_non_empty(self):
-        from cyber_sentry.agents.ai_agents import get_all_ai_agents
+        from dexter_ai.agents.ai_agents import get_all_ai_agents
         for name, desc in get_all_ai_agents().items():
             assert len(desc) > 10, f"Agent '{name}' has empty description"
 
@@ -845,11 +845,11 @@ class TestReportingEngine:
     """Tests for the detailed reporting engine."""
 
     def test_report_generator_importable(self):
-        from cyber_sentry.reporting import report_generator
+        from dexter_ai.reporting import report_generator
         assert report_generator is not None
 
     def test_calculate_risk_score(self):
-        from cyber_sentry.reporting import report_generator
+        from dexter_ai.reporting import report_generator
         score = report_generator.calculate_risk_score([
             {"severity": "critical"},
             {"severity": "high"},
@@ -859,11 +859,11 @@ class TestReportingEngine:
         assert score > 5  # critical + high should give high score
 
     def test_risk_score_empty_is_zero(self):
-        from cyber_sentry.reporting import report_generator
+        from dexter_ai.reporting import report_generator
         assert report_generator.calculate_risk_score([]) == 0
 
     def test_generate_full_report(self):
-        from cyber_sentry.reporting import report_generator
+        from dexter_ai.reporting import report_generator
         report = report_generator.generate_full_report(
             [{"thought_trace": [
                 {"node": "tool", "action": "nmap_scan", "observation": "22/tcp open ssh"}
@@ -875,7 +875,7 @@ class TestReportingEngine:
         assert "10.0.0.1" in report
 
     def test_generate_exploitation_guide(self):
-        from cyber_sentry.reporting import report_generator
+        from dexter_ai.reporting import report_generator
         guide = report_generator.generate_exploitation_guide(
             {"type": "sqli", "description": "SQL injection in login form"}
         )
@@ -883,7 +883,7 @@ class TestReportingEngine:
         assert len(guide) > 50
 
     def test_generate_remediation(self):
-        from cyber_sentry.reporting import report_generator
+        from dexter_ai.reporting import report_generator
         rem = report_generator.generate_remediation(
             {"type": "xss", "description": "Reflected XSS"}
         )
@@ -897,24 +897,24 @@ class TestAutonomousEngine:
     """Tests for the autonomous pentesting engine and specialist team."""
 
     def test_specialist_team_has_specialists(self):
-        from cyber_sentry.autonomous import specialist_team
+        from dexter_ai.autonomous import specialist_team
         specs = specialist_team.list_specialists()
         assert len(specs) >= 7
 
     def test_specialist_roles(self):
-        from cyber_sentry.autonomous import specialist_team
+        from dexter_ai.autonomous import specialist_team
         roles = {s.role for s in specialist_team.list_specialists()}
         for expected in ["reconnaissance", "web", "network", "exploit", "forensics", "cloud", "reporting"]:
             assert expected in roles, f"Missing specialist role: {expected}"
 
     def test_delegate_task(self):
-        from cyber_sentry.autonomous import specialist_team
+        from dexter_ai.autonomous import specialist_team
         result = specialist_team.delegate_task("scan for XSS vulnerabilities", {})
         assert "specialist" in result
         assert "task" in result
 
     def test_plan_assessment(self):
-        from cyber_sentry.autonomous import autonomous_engine
+        from dexter_ai.autonomous import autonomous_engine
         plan = autonomous_engine.plan_assessment("example.com", "full pentest")
         assert len(plan) >= 5
         # All phases should have name and status
@@ -923,7 +923,7 @@ class TestAutonomousEngine:
             assert "status" in phase
 
     def test_determine_next_step(self):
-        from cyber_sentry.autonomous import autonomous_engine
+        from dexter_ai.autonomous import autonomous_engine
         step = autonomous_engine.determine_next_step(
             {"phase": "reconnaissance", "completed_phases": ["reconnaissance"]},
             []
@@ -931,7 +931,7 @@ class TestAutonomousEngine:
         assert "action" in step
 
     def test_plan_phases_ordered(self):
-        from cyber_sentry.autonomous import autonomous_engine
+        from dexter_ai.autonomous import autonomous_engine
         plan = autonomous_engine.plan_assessment("example.com", "pentest")
         names = [p["name"] for p in plan]
         assert names[0] == "reconnaissance"  # always starts with recon
@@ -944,39 +944,39 @@ class TestCLIEnhancements:
     """Tests for the enhanced CLI."""
 
     def test_banner_contains_version(self):
-        from cyber_sentry.cli import BANNER
-        from cyber_sentry import __version__
+        from dexter_ai.cli import BANNER
+        from dexter_ai import __version__
         assert __version__ in BANNER
 
     def test_banner_has_tool_count(self):
-        from cyber_sentry.cli import BANNER
+        from dexter_ai.cli import BANNER
         assert "151" in BANNER
 
     def test_banner_has_agent_count(self):
-        from cyber_sentry.cli import BANNER
+        from dexter_ai.cli import BANNER
         assert "12" in BANNER
 
     def test_help_text_has_agents_command(self):
-        from cyber_sentry.cli import HELP_TEXT
+        from dexter_ai.cli import HELP_TEXT
         assert "/agents" in HELP_TEXT
 
     def test_help_text_has_status_command(self):
-        from cyber_sentry.cli import HELP_TEXT
+        from dexter_ai.cli import HELP_TEXT
         assert "/status" in HELP_TEXT
 
     def test_help_text_has_dashboard_command(self):
-        from cyber_sentry.cli import HELP_TEXT
+        from dexter_ai.cli import HELP_TEXT
         assert "/dashboard" in HELP_TEXT
 
     def test_colors_class_exists(self):
-        from cyber_sentry.cli import Colors
+        from dexter_ai.cli import Colors
         assert hasattr(Colors, "RED")
         assert hasattr(Colors, "GREEN")
         assert hasattr(Colors, "CYAN")
         assert hasattr(Colors, "RESET")
 
     def test_color_helpers(self):
-        from cyber_sentry.cli import colored, success, error, warning, info, header
+        from dexter_ai.cli import colored, success, error, warning, info, header
         assert "\033[" in colored("test", "\033[91m")
         assert "✓" in success("ok")
         assert "✗" in error("fail")
@@ -985,89 +985,89 @@ class TestCLIEnhancements:
         assert "═══" in header("title")
 
     def test_format_agents(self):
-        from cyber_sentry.cli import _format_agents
+        from dexter_ai.cli import _format_agents
         output = _format_agents()
         assert "IntelligentDecisionEngine" in output
         assert "GracefulDegradation" in output
 
     def test_format_tools_table(self):
-        from cyber_sentry.cli import _format_tools_table
+        from dexter_ai.cli import _format_tools_table
         output = _format_tools_table()
         assert "151" in output or "TOOL ARSENAL" in output
 
     def test_agents_list_defined(self):
-        from cyber_sentry.cli import _AGENTS
+        from dexter_ai.cli import _AGENTS
         assert len(_AGENTS) >= 12
 
 
 # ── MCP Server ────────────────────────────────────────────────────────────────
 
 class TestMCPServer:
-    """Tests for the FastMCP-based MCP server (cyber_sentry_mcp.py)."""
+    """Tests for the FastMCP-based MCP server (dexter_ai_mcp.py)."""
 
     def test_mcp_script_importable(self):
         """The MCP server module is importable."""
-        import cyber_sentry_mcp
-        assert hasattr(cyber_sentry_mcp, "setup_mcp_server")
-        assert hasattr(cyber_sentry_mcp, "main")
+        import dexter_ai_mcp
+        assert hasattr(dexter_ai_mcp, "setup_mcp_server")
+        assert hasattr(dexter_ai_mcp, "main")
 
     def test_setup_mcp_server_full(self):
         """Full-mode setup returns a FastMCP instance."""
-        from cyber_sentry_mcp import setup_mcp_server
+        from dexter_ai_mcp import setup_mcp_server
         mcp = setup_mcp_server(compact=False)
         assert mcp is not None
 
     def test_setup_mcp_server_compact(self):
         """Compact-mode setup returns a FastMCP instance."""
-        from cyber_sentry_mcp import setup_mcp_server
+        from dexter_ai_mcp import setup_mcp_server
         mcp = setup_mcp_server(compact=True)
         assert mcp is not None
 
     def test_gateway_scope_check(self):
         """scope_check tool validates authorized targets."""
-        from cyber_sentry_mcp import _validate_scope
+        from dexter_ai_mcp import _validate_scope
         assert _validate_scope("example.com") is True
         assert _validate_scope("testphp.vulnweb.com") is True
         assert _validate_scope("evil.com") is False
 
     def test_run_tool_unauthorized(self):
         """_run_tool rejects out-of-scope targets."""
-        from cyber_sentry_mcp import _run_tool
+        from dexter_ai_mcp import _run_tool
         result = _run_tool("nmap_scan", "", "evil.com")
         assert result["success"] is False
         assert "NOT in the authorized scope" in result["error"]
 
     def test_run_tool_unknown(self):
         """_run_tool returns error for unknown tool names."""
-        from cyber_sentry_mcp import _run_tool
+        from dexter_ai_mcp import _run_tool
         result = _run_tool("nonexistent_tool", "", "example.com")
         assert result["success"] is False
         assert "Unknown tool" in result["error"]
 
     def test_get_version(self):
         """_get_version returns the package version."""
-        from cyber_sentry_mcp import _get_version
+        from dexter_ai_mcp import _get_version
         version = _get_version()
         assert version  # non-empty string
 
     def test_mcp_config_json_exists(self):
-        """cyber-sentry-mcp.json config file exists and is valid JSON."""
-        config_path = Path(__file__).parent.parent / "cyber-sentry-mcp.json"
+        """dexter-ai-mcp.json config file exists and is valid JSON."""
+        config_path = Path(__file__).parent.parent / "dexter-ai-mcp.json"
         assert config_path.exists()
         data = json.loads(config_path.read_text())
         assert "mcpServers" in data
-        assert "cyber-sentry" in data["mcpServers"]
-        cfg = data["mcpServers"]["cyber-sentry"]
+        assert "dexter-ai" in data["mcpServers"]
+        cfg = data["mcpServers"]["dexter-ai"]
         assert cfg["command"] == "python3"
-        assert "cyber_sentry_mcp.py" in cfg["args"][0]
+        assert "dexter_ai_mcp.py" in cfg["args"][0]
 
     def test_parse_args_defaults(self):
         """parse_args returns correct defaults."""
         import sys
         old_argv = sys.argv
-        sys.argv = ["cyber_sentry_mcp.py"]
+        sys.argv = ["dexter_ai_mcp.py"]
         try:
-            from cyber_sentry_mcp import parse_args
+            from dexter_ai_mcp import parse_args
             args = parse_args()
             assert args.server is None
             assert args.timeout == 300
@@ -1080,9 +1080,9 @@ class TestMCPServer:
         """parse_args respects --compact flag."""
         import sys
         old_argv = sys.argv
-        sys.argv = ["cyber_sentry_mcp.py", "--compact"]
+        sys.argv = ["dexter_ai_mcp.py", "--compact"]
         try:
-            from cyber_sentry_mcp import parse_args
+            from dexter_ai_mcp import parse_args
             args = parse_args()
             assert args.compact is True
         finally:
@@ -1092,9 +1092,9 @@ class TestMCPServer:
         """parse_args respects --server flag."""
         import sys
         old_argv = sys.argv
-        sys.argv = ["cyber_sentry_mcp.py", "--server", "http://localhost:8000"]
+        sys.argv = ["dexter_ai_mcp.py", "--server", "http://localhost:8000"]
         try:
-            from cyber_sentry_mcp import parse_args
+            from dexter_ai_mcp import parse_args
             args = parse_args()
             assert args.server == "http://localhost:8000"
         finally:

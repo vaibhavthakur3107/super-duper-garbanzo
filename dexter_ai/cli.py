@@ -1,15 +1,15 @@
 """
-Cyber-Sentry AI – CLI Entry Point
+Dexter AI Pentest – CLI Entry Point
 Mirrors the 'pentestagent' command-line interface from PentestAgent.
 
 Usage:
-    python -m cyber_sentry.cli                        # interactive mode
-    python -m cyber_sentry.cli -t example.com         # set target upfront
-    python -m cyber_sentry.cli -t example.com --playbook web_pentest
-    python -m cyber_sentry.cli run -t example.com --playbook recon
-    python -m cyber_sentry.cli notes                  # show saved notes
-    python -m cyber_sentry.cli report                 # generate report
-    python -m cyber_sentry.cli playbooks              # list playbooks
+    python -m dexter_ai.cli                        # interactive mode
+    python -m dexter_ai.cli -t example.com         # set target upfront
+    python -m dexter_ai.cli -t example.com --playbook web_pentest
+    python -m dexter_ai.cli run -t example.com --playbook recon
+    python -m dexter_ai.cli notes                  # show saved notes
+    python -m dexter_ai.cli report                 # generate report
+    python -m dexter_ai.cli playbooks              # list playbooks
 """
 
 import argparse
@@ -20,13 +20,13 @@ import sys
 import time
 from pathlib import Path
 
-# Allow running as  python -m cyber_sentry.cli  from repo root
+# Allow running as  python -m dexter_ai.cli  from repo root
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
-from cyber_sentry import __version__
-from cyber_sentry.providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
-from cyber_sentry.notes import NotesManager
+from dexter_ai import __version__
+from dexter_ai.providers import PROVIDER_OLLAMA, PROVIDER_OPENAI, PROVIDER_ANTHROPIC, PROVIDER_OPENROUTER
+from dexter_ai.notes import NotesManager
 
 
 # ── ANSI Color Utilities ─────────────────────────────────────────────────────
@@ -76,19 +76,19 @@ def header(text):
 BANNER = (
     f"\n"
     f"{Colors.CYAN}{Colors.BOLD}"
-    f"   ██████╗██╗   ██╗██████╗ ███████╗██████╗ \n"
-    f"  ██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗\n"
-    f"  ██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝\n"
-    f"  ██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗\n"
-    f"  ╚██████╗   ██║   ██████╔╝███████╗██║  ██║\n"
-    f"   ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝{Colors.RESET}\n"
+    f"  ██████╗ ███████╗██╗  ██╗████████╗███████╗██████╗ \n"
+    f"  ██╔══██╗██╔════╝╚██╗██╔╝╚══██╔══╝██╔════╝██╔══██╗\n"
+    f"  ██║  ██║█████╗   ╚███╔╝    ██║   █████╗  ██████╔╝\n"
+    f"  ██║  ██║██╔══╝   ██╔██╗    ██║   ██╔══╝  ██╔══██╗\n"
+    f"  ██████╔╝███████╗██╔╝ ██╗   ██║   ███████╗██║  ██║\n"
+    f"  ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝{Colors.RESET}\n"
     f"{Colors.RED}{Colors.BOLD}"
-    f"  ███████╗███████╗███╗   ██╗████████╗██████╗ ██╗   ██╗\n"
-    f"  ██╔════╝██╔════╝████╗  ██║╚══██╔══╝██╔══██╗╚██╗ ██╔╝\n"
-    f"  ███████╗█████╗  ██╔██╗ ██║   ██║   ██████╔╝ ╚████╔╝ \n"
-    f"  ╚════██║██╔══╝  ██║╚██╗██║   ██║   ██╔══██╗  ╚██╔╝  \n"
-    f"  ███████║███████╗██║ ╚████║   ██║   ██║  ██║   ██║   \n"
-    f"  ╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   {Colors.RESET}\n"
+    f"     █████╗ ██╗    ██████╗ ███████╗███╗   ██╗████████╗███████╗███████╗████████╗\n"
+    f"    ██╔══██╗██║    ██╔══██╗██╔════╝████╗  ██║╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝\n"
+    f"    ███████║██║    ██████╔╝█████╗  ██╔██╗ ██║   ██║   █████╗  ███████╗   ██║   \n"
+    f"    ██╔══██║██║    ██╔═══╝ ██╔══╝  ██║╚██╗██║   ██║   ██╔══╝  ╚════██║   ██║   \n"
+    f"    ██║  ██║██║    ██║     ███████╗██║ ╚████║   ██║   ███████╗███████║   ██║   \n"
+    f"    ╚═╝  ╚═╝╚═╝    ╚═╝     ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝   ╚═╝   {Colors.RESET}\n"
     f"\n"
     f"  {Colors.DIM}{'─' * 56}{Colors.RESET}\n"
     f"  {Colors.GREEN}▸ AI-Powered Red Team Pentesting Agent{Colors.RESET}\n"
@@ -155,7 +155,7 @@ def _status_dashboard(target: str, notes: NotesManager, provider: str, session_c
 
     # Try to get cache stats
     try:
-        from cyber_sentry.cache import SmartCache
+        from dexter_ai.cache import SmartCache
         cache = SmartCache()
         hits = cache.stats.get("hits", 0)
         misses = cache.stats.get("misses", 0)
@@ -166,7 +166,7 @@ def _status_dashboard(target: str, notes: NotesManager, provider: str, session_c
     border = Colors.CYAN
     lines = [
         f"  {border}╔{'═' * w}╗{Colors.RESET}",
-        f"  {border}║{Colors.RESET}  {Colors.BOLD}{Colors.CYAN}CYBER-SENTRY AI v{__version__} — STATUS DASHBOARD{Colors.RESET}{' ' * max(0, w - 39 - len(__version__))}{border}║{Colors.RESET}",
+        f"  {border}║{Colors.RESET}  {Colors.BOLD}{Colors.CYAN}DEXTER AI PENTEST v{__version__} — STATUS DASHBOARD{Colors.RESET}{' ' * max(0, w - 39 - len(__version__))}{border}║{Colors.RESET}",
         f"  {border}╠{'═' * w}╣{Colors.RESET}",
         f"  {border}║{Colors.RESET}  🎯 Target: {t_display:<20s}  Status: {status}{' ' * max(0, w - 43 - len(t_display))}{border}║{Colors.RESET}",
         f"  {border}║{Colors.RESET}  🔧 Tools:  151+{' ' * 17}Agents: 12+{' ' * (w - 48)}{border}║{Colors.RESET}",
@@ -179,7 +179,7 @@ def _status_dashboard(target: str, notes: NotesManager, provider: str, session_c
 
 def _format_tools_table() -> str:
     """Render tools grouped by category in a table."""
-    from cyber_sentry.tools.network_tools import tool_registry
+    from dexter_ai.tools.network_tools import tool_registry
     tools = tool_registry.list_tools()
     categories: dict[str, list] = {}
     for t in tools:
@@ -288,7 +288,7 @@ def _parse_playbook_minimal(name: str) -> dict | None:
 
 def _handle_mcp_command(prompt: str):
     """Handle /mcp <subcommand> in the interactive REPL."""
-    from cyber_sentry.mcp import MCPClient  # noqa: C0415
+    from dexter_ai.mcp import MCPClient  # noqa: C0415
     client = MCPClient()
     parts = prompt.split()
     sub = parts[1] if len(parts) > 1 else "list"
@@ -325,7 +325,7 @@ def _handle_mcp_command(prompt: str):
 async def run_agent(target: str, task: str, model: str, provider: str, notes: NotesManager) -> dict:
     """Run the LangGraph pentesting agent and save findings."""
     # Lazy import – avoids pulling in langgraph at CLI startup
-    from cyber_sentry.main import run_pentest  # noqa: C0415
+    from dexter_ai.main import run_pentest  # noqa: C0415
     t0 = time.time()
     print(f"\n{info(f'Starting agent on target: {target}')}")
     print(f"{info(f'Task: {task}')}")
@@ -370,9 +370,9 @@ def interactive_mode(args: argparse.Namespace):
     while True:
         try:
             if target:
-                prompt_str = f"{Colors.RED}⚡{Colors.RESET}{Colors.CYAN}{Colors.BOLD}cyber-sentry{Colors.RESET}{Colors.DIM}[{Colors.RESET}{Colors.YELLOW}{target}{Colors.RESET}{Colors.DIM}]{Colors.RESET}{Colors.CYAN}>{Colors.RESET} "
+                prompt_str = f"{Colors.RED}⚡{Colors.RESET}{Colors.CYAN}{Colors.BOLD}dexter-ai{Colors.RESET}{Colors.DIM}[{Colors.RESET}{Colors.YELLOW}{target}{Colors.RESET}{Colors.DIM}]{Colors.RESET}{Colors.CYAN}>{Colors.RESET} "
             else:
-                prompt_str = f"{Colors.RED}⚡{Colors.RESET}{Colors.CYAN}{Colors.BOLD}cyber-sentry{Colors.RESET}{Colors.CYAN}>{Colors.RESET} "
+                prompt_str = f"{Colors.RED}⚡{Colors.RESET}{Colors.CYAN}{Colors.BOLD}dexter-ai{Colors.RESET}{Colors.CYAN}>{Colors.RESET} "
             prompt = input(prompt_str).strip()
         except (KeyboardInterrupt, EOFError):
             print(f"\n{info('Exiting. Goodbye!')}")
@@ -493,8 +493,8 @@ def run_mode(args: argparse.Namespace):
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="cyber-sentry",
-        description="Cyber-Sentry AI – Red Team Pentesting Agent",
+        prog="dexter-ai",
+        description="Dexter AI Pentest – Red Team Pentesting Agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )

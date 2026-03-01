@@ -1,10 +1,10 @@
-# 🛡️ Cyber-Sentry AI
+# 🛡️ Dexter AI Pentest
 
 > AI-powered autonomous Red Team Pentesting Agent — similar to [PentestGPT](https://github.com/GreyDGL/PentestGPT), [Pentagi](https://github.com/vxcontrol/pentagi), [PentestAgent](https://github.com/GH05TCREW/pentestagent), and [Shannon](https://github.com/KeygraphHQ/shannon).
 
 [![Python](https://img.shields.io/badge/Python-3.10+-green)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)](Dockerfile)
-[![LangGraph](https://img.shields.io/badge/LangGraph-Agent_Graph-blue)](cyber_sentry/main.py)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agent_Graph-blue)](dexter_ai/main.py)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-passing-brightgreen)](tests/)
 
@@ -16,7 +16,7 @@
 
 ## 📖 Overview
 
-Cyber-Sentry is a production-ready **multi-agent pentesting system** built with:
+Dexter AI Pentest is a production-ready **multi-agent pentesting system** built with:
 
 - **LangGraph** for agent orchestration (Supervisor → Guardrail → Planner → Tool → Reflection loop)
 - **Ollama / OpenAI / Anthropic / OpenRouter** for LLM inference
@@ -28,7 +28,7 @@ Cyber-Sentry is a production-ready **multi-agent pentesting system** built with:
 - **MCP (Model Context Protocol)** integration for external tool servers
 - **Docker** for isolated, reproducible execution
 
-For detailed documentation see [`cyber_sentry/README.md`](cyber_sentry/README.md).
+For detailed documentation see [`dexter_ai/README.md`](dexter_ai/README.md).
 
 ---
 
@@ -57,14 +57,14 @@ make run-cli               # interactive CLI
 ## 🖥️ CLI
 
 ```bash
-python -m cyber_sentry.cli                          # interactive REPL
-python -m cyber_sentry.cli -t 192.168.1.1           # pre-set target
-python -m cyber_sentry.cli run -t example.com \
+python -m dexter_ai.cli                          # interactive REPL
+python -m dexter_ai.cli -t 192.168.1.1           # pre-set target
+python -m dexter_ai.cli run -t example.com \
     --playbook web_pentest --report                  # one-shot + report
 
 # MCP server management
-python -m cyber_sentry.cli mcp list
-python -m cyber_sentry.cli mcp add nmap npx gc-nmap-mcp
+python -m dexter_ai.cli mcp list
+python -m dexter_ai.cli mcp add nmap npx gc-nmap-mcp
 ```
 
 ---
@@ -93,7 +93,7 @@ python -m cyber_sentry.cli mcp add nmap npx gc-nmap-mcp
 
 ## 🧩 MCP Support — AI Client Integration
 
-Cyber-Sentry includes a **FastMCP-based MCP server** (inspired by [HexStrike AI](https://github.com/0x4m4/hexstrike-ai)) that lets you use all 151+ security tools directly from **Claude Desktop**, **Cursor**, or **VS Code Copilot** — no Docker required.
+Dexter AI Pentest includes a **FastMCP-based MCP server** (inspired by [HexStrike AI](https://github.com/0x4m4/hexstrike-ai)) that lets you use all 151+ security tools directly from **Claude Desktop**, **Cursor**, or **VS Code Copilot** — no Docker required.
 
 ### Quick Setup (No Docker)
 
@@ -103,19 +103,19 @@ git clone https://github.com/vaibhavthakur3107/super-duper-garbanzo.git
 cd super-duper-garbanzo
 
 # 2. Create virtual environment
-python3 -m venv cyber-sentry-env
-source cyber-sentry-env/bin/activate   # Linux/Mac
-# cyber-sentry-env\Scripts\activate    # Windows
+python3 -m venv dexter-ai-env
+source dexter-ai-env/bin/activate   # Linux/Mac
+# dexter-ai-env\Scripts\activate    # Windows
 
 # 3. Install dependencies
 pip3 install -e "."
 pip3 install "mcp[cli]>=1.0.0"
 
 # 4. Start the MCP server (to test it works)
-python3 cyber_sentry_mcp.py --list-tools
+python3 dexter_ai_mcp.py --list-tools
 
 # 5. Or start it in compact mode (3 gateway tools only — ideal for small LLMs)
-python3 cyber_sentry_mcp.py --compact --list-tools
+python3 dexter_ai_mcp.py --compact --list-tools
 ```
 
 ### Claude Desktop Integration
@@ -125,12 +125,12 @@ Edit `~/.config/Claude/claude_desktop_config.json` (Linux/Mac) or `%APPDATA%\Cla
 ```json
 {
   "mcpServers": {
-    "cyber-sentry": {
+    "dexter-ai": {
       "command": "python3",
       "args": [
-        "/path/to/super-duper-garbanzo/cyber_sentry_mcp.py"
+        "/path/to/super-duper-garbanzo/dexter_ai_mcp.py"
       ],
-      "description": "Cyber-Sentry AI v2.0 – AI Red Team Pentesting Agent",
+      "description": "Dexter AI Pentest v2.0 – AI Red Team Pentesting Agent",
       "timeout": 300,
       "disabled": false
     }
@@ -139,7 +139,7 @@ Edit `~/.config/Claude/claude_desktop_config.json` (Linux/Mac) or `%APPDATA%\Cla
 ```
 
 > **Tip:** Use the full path to your venv Python if you installed in a venv:
-> `"command": "/path/to/super-duper-garbanzo/cyber-sentry-env/bin/python3"`
+> `"command": "/path/to/super-duper-garbanzo/dexter-ai-env/bin/python3"`
 
 ### Cursor Integration
 
@@ -153,11 +153,11 @@ Add to `.vscode/settings.json`:
 {
   "mcp": {
     "servers": {
-      "cyber-sentry": {
+      "dexter-ai": {
         "type": "stdio",
         "command": "python3",
         "args": [
-          "/path/to/super-duper-garbanzo/cyber_sentry_mcp.py"
+          "/path/to/super-duper-garbanzo/dexter_ai_mcp.py"
         ]
       }
     }
@@ -171,12 +171,12 @@ Add to `.vscode/settings.json`:
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "cyber-sentry": {
+    "dexter-ai": {
       "type": "local",
       "timeout": 300,
       "command": [
-        "/path/to/super-duper-garbanzo/cyber-sentry-env/bin/python3",
-        "/path/to/super-duper-garbanzo/cyber_sentry_mcp.py"
+        "/path/to/super-duper-garbanzo/dexter-ai-env/bin/python3",
+        "/path/to/super-duper-garbanzo/dexter_ai_mcp.py"
       ],
       "enabled": true
     }
@@ -189,7 +189,7 @@ Add to `.vscode/settings.json`:
 | Flag | Description |
 |---|---|
 | `--compact` | Load only 3 gateway tools (scope_check, run_security_tool, system_status) — for small LLMs |
-| `--server URL` | Optional upstream Cyber-Sentry API server URL |
+| `--server URL` | Optional upstream Dexter AI Pentest API server URL |
 | `--timeout N` | Tool execution timeout in seconds (default: 300) |
 | `--debug` | Enable debug logging |
 | `--list-tools` | Print registered tools and exit |
@@ -222,7 +222,7 @@ Add to `.vscode/settings.json`:
 
 ### Using with MCP Servers (External Tools)
 
-Cyber-Sentry also supports [Model Context Protocol](https://modelcontextprotocol.io/) servers for external tools:
+Dexter AI Pentest also supports [Model Context Protocol](https://modelcontextprotocol.io/) servers for external tools:
 
 ```bash
 # Configure MCP servers
@@ -238,7 +238,7 @@ cp mcp_servers.json.example mcp_servers.json
 
 ## 🧠 Knowledge Base
 
-Place domain knowledge, CVE notes, or methodologies in `cyber_sentry/knowledge/sources/` — they are injected into the agent context automatically at runtime.
+Place domain knowledge, CVE notes, or methodologies in `dexter_ai/knowledge/sources/` — they are injected into the agent context automatically at runtime.
 
 ---
 

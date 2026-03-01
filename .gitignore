@@ -46,10 +46,10 @@ script.js
 style.css
 *.tmp
 
-# Cyber-Sentry
-cyber_sentry/ui/node_modules/
-cyber_sentry/ui/dist/
-cyber_sentry/ui/.vite/
+# Dexter AI Pentest
+dexter_ai/ui/node_modules/
+dexter_ai/ui/dist/
+dexter_ai/ui/.vite/
 *.log
 *.db
 

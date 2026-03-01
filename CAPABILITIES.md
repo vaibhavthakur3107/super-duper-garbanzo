@@ -1,4 +1,4 @@
-# 🛡️ Cyber-Sentry AI — Complete Capabilities Reference
+# 🛡️ Dexter AI Pentest — Complete Capabilities Reference
 
 > **Everything your project can do — explained from first principles.**
 > Every single feature, layer, and module, in plain English.
@@ -32,7 +32,7 @@
 
 ## 1. The Big Picture
 
-Cyber-Sentry AI is an **autonomous AI agent for penetration testing and red team security assessments**.
+Dexter AI Pentest is an **autonomous AI agent for penetration testing and red team security assessments**.
 
 You give it:
 - A **target** (domain, IP, or IP range you own or have permission to test)
@@ -54,7 +54,7 @@ It does all of this **without you having to type a single command** — the AI d
 
 ## 2. The LangGraph Agent Brain
 
-**File:** `cyber_sentry/main.py`
+**File:** `dexter_ai/main.py`
 
 The core agent is built as a **state machine** using [LangGraph](https://langchain-ai.github.io/langgraph/). This means instead of a simple chatbot loop, the agent has a defined graph of nodes (steps), each with a specific job, connected by edges (transitions).
 
@@ -117,9 +117,9 @@ This architecture means the agent is **transparent and auditable** — you can s
 
 ## 3. The Multi-Agent System
 
-**Files:** `cyber_sentry/agents/__init__.py`, `cyber_sentry/agents/specialized.py`
+**Files:** `dexter_ai/agents/__init__.py`, `dexter_ai/agents/specialized.py`
 
-Besides the LangGraph brain, Cyber-Sentry has a separate **multi-agent orchestration system** used by the FastAPI backend. It follows the **ReAct (Reason + Act)** framework.
+Besides the LangGraph brain, Dexter AI Pentest has a separate **multi-agent orchestration system** used by the FastAPI backend. It follows the **ReAct (Reason + Act)** framework.
 
 ### Base Agent Class (`Agent`)
 
@@ -165,7 +165,7 @@ Every agent:
 
 ## 4. All Security Tools
 
-### Real Tool Wrappers — `cyber_sentry/tools/network_tools.py`
+### Real Tool Wrappers — `dexter_ai/tools/network_tools.py`
 
 These functions run **real system commands** and return their actual output.
 
@@ -243,7 +243,7 @@ These functions run **real system commands** and return their actual output.
 - Truncates output at 100,000 characters
 - Returns combined stdout+stderr
 
-### API-Layer Tool Classes — `cyber_sentry/tools/registry.py`
+### API-Layer Tool Classes — `dexter_ai/tools/registry.py`
 
 These are the object-oriented tool classes used by the FastAPI-facing `ToolRegistry`:
 
@@ -260,9 +260,9 @@ These are the object-oriented tool classes used by the FastAPI-facing `ToolRegis
 
 ## 5. The Safety Guardrails
 
-Cyber-Sentry has **two separate guardrail layers** — one in the LangGraph brain, one in the API agent system.
+Dexter AI Pentest has **two separate guardrail layers** — one in the LangGraph brain, one in the API agent system.
 
-### LangGraph Guardrails — `cyber_sentry/guardrails/scope_validator.py`
+### LangGraph Guardrails — `dexter_ai/guardrails/scope_validator.py`
 
 #### `validate_scope(target)`
 The most important safety check. Called before **any** tool runs. Checks if a target is allowed.
@@ -288,7 +288,7 @@ Blocks messages containing:
 - `"you are now"`, `"disregard instructions"`
 - `"new instructions:"`, `"system:"`, `"assistant:"`
 
-### API Guardrails — `cyber_sentry/guardrails/security.py`
+### API Guardrails — `dexter_ai/guardrails/security.py`
 
 Seven guardrails used by the FastAPI multi-agent system:
 
@@ -306,7 +306,7 @@ Seven guardrails used by the FastAPI multi-agent system:
 
 ## 6. Attack Playbooks
 
-**Directory:** `cyber_sentry/playbooks/`
+**Directory:** `dexter_ai/playbooks/`
 
 Playbooks are YAML files that define pre-built attack workflows. Each one sets the task description that gets sent to the LangGraph agent.
 
@@ -364,7 +364,7 @@ Playbooks are YAML files that define pre-built attack workflows. Each one sets t
 
 ### Creating Your Own Playbook
 
-Drop any `.yaml` file in `cyber_sentry/playbooks/` with this structure:
+Drop any `.yaml` file in `dexter_ai/playbooks/` with this structure:
 
 ```yaml
 name: my_playbook
@@ -387,8 +387,8 @@ phases:
 
 ## 7. The Knowledge Base (RAG)
 
-**File:** `cyber_sentry/knowledge/__init__.py`
-**Sources:** `cyber_sentry/knowledge/sources/`
+**File:** `dexter_ai/knowledge/__init__.py`
+**Sources:** `dexter_ai/knowledge/sources/`
 
 The Knowledge Base is a lightweight **Retrieval-Augmented Generation (RAG)** system that injects domain expertise into agent prompts.
 
@@ -423,10 +423,10 @@ Contains:
 
 ```bash
 # Add CVE cheat sheet
-echo "# Apache CVEs..." > cyber_sentry/knowledge/sources/apache_cves.md
+echo "# Apache CVEs..." > dexter_ai/knowledge/sources/apache_cves.md
 
 # Add your custom methodology
-echo "# My Red Team Notes..." > cyber_sentry/knowledge/sources/custom_methodology.md
+echo "# My Red Team Notes..." > dexter_ai/knowledge/sources/custom_methodology.md
 ```
 
 The agent automatically picks it up on next run — no code changes needed.
@@ -435,7 +435,7 @@ The agent automatically picks it up on next run — no code changes needed.
 
 ## 8. Web Search
 
-**Function:** `web_search()` in `cyber_sentry/tools/network_tools.py`
+**Function:** `web_search()` in `dexter_ai/tools/network_tools.py`
 
 The agent can search the web to look up CVE details, vulnerability info, exploit availability, and attack techniques.
 
@@ -462,10 +462,10 @@ The agent calls `web_search` to:
 
 ## 9. MCP — Model Context Protocol
 
-**File:** `cyber_sentry/mcp/__init__.py`
+**File:** `dexter_ai/mcp/__init__.py`
 **Config:** `mcp_servers.json` (copy from `mcp_servers.json.example`)
 
-MCP (Model Context Protocol) is an open standard for connecting AI agents to external tool servers. Cyber-Sentry implements a full MCP client that lets you plug **any external tool** into the agent.
+MCP (Model Context Protocol) is an open standard for connecting AI agents to external tool servers. Dexter AI Pentest implements a full MCP client that lets you plug **any external tool** into the agent.
 
 ### What You Can Connect
 
@@ -515,7 +515,7 @@ MCP (Model Context Protocol) is an open standard for connecting AI agents to ext
 
 ## 10. Notes / Loot System
 
-**File:** `cyber_sentry/notes.py`
+**File:** `dexter_ai/notes.py`
 **Storage:** `./loot/notes.json` (persists across sessions)
 
 Every finding from every assessment is automatically saved.
@@ -562,7 +562,7 @@ Reports are **Markdown files** generated automatically from notes and thought tr
 ### What's in a Report
 
 ```markdown
-# Cyber-Sentry AI – Penetration Test Report
+# Dexter AI Pentest – Penetration Test Report
 
 **Target:** testphp.vulnweb.com
 **Generated:** 2024-03-01 14:30:22
@@ -600,10 +600,10 @@ PORT   STATE SERVICE VERSION
 
 ```bash
 # CLI interactive
-cyber-sentry> /report
+dexter-ai> /report
 
 # CLI one-shot (automatic after run)
-python -m cyber_sentry.cli run -t target.com --report
+python -m dexter_ai.cli run -t target.com --report
 
 # Streamlit UI
 # Scroll to bottom → "📥 Generate Markdown Report" → "⬇️ Download report.md"
@@ -615,8 +615,8 @@ Reports are saved to `loot/report_YYYYMMDD_HHMMSS.md`.
 
 ## 12. SQLite Memory / Session Storage
 
-**File:** `cyber_sentry/db/memory.py`
-**Database:** `cyber_sentry.db` (SQLite, auto-created)
+**File:** `dexter_ai/db/memory.py`
+**Database:** `dexter_ai.db` (SQLite, auto-created)
 
 Full conversation and session history is persisted in a local SQLite database.
 
@@ -646,9 +646,9 @@ Full conversation and session history is persisted in a local SQLite database.
 
 ## 13. LLM Providers
 
-**File:** `cyber_sentry/providers.py`
+**File:** `dexter_ai/providers.py`
 
-Cyber-Sentry works with **four LLM providers**. You can switch between them by setting one environment variable.
+Dexter AI Pentest works with **four LLM providers**. You can switch between them by setting one environment variable.
 
 ### Provider Selection Order
 
@@ -691,16 +691,16 @@ Returns the right `ChatLLM` object for the selected provider. Called by all entr
 
 ## 14. Interactive CLI
 
-**File:** `cyber_sentry/cli.py`
-**Entry point:** `python -m cyber_sentry.cli`
+**File:** `dexter_ai/cli.py`
+**Entry point:** `python -m dexter_ai.cli`
 
 The CLI has two modes: interactive REPL and one-shot non-interactive.
 
 ### Interactive REPL Mode
 
-Launch with: `python -m cyber_sentry.cli`
+Launch with: `python -m dexter_ai.cli`
 
-You get the Cyber-Sentry banner and a `cyber-sentry>` prompt.
+You get the Dexter AI Pentest banner and a `dexter-ai>` prompt.
 
 #### All Slash Commands
 
@@ -724,12 +724,12 @@ You get the Cyber-Sentry banner and a `cyber-sentry>` prompt.
 #### Default Behaviour (no slash command)
 If you type a plain sentence and a target is set, it runs the agent with that as the task. Example:
 ```
-cyber-sentry> find all open ports and look for web vulnerabilities
+dexter-ai> find all open ports and look for web vulnerabilities
 ```
 
 ### One-Shot Mode (Subcommands)
 
-#### `python -m cyber_sentry.cli run`
+#### `python -m dexter_ai.cli run`
 ```
 -t / --target     (required) Target host
 --task            Custom task description
@@ -739,13 +739,13 @@ cyber-sentry> find all open ports and look for web vulnerabilities
 --report          Save Markdown report when done
 ```
 
-#### `python -m cyber_sentry.cli notes`
+#### `python -m dexter_ai.cli notes`
 Prints all notes from `loot/notes.json`.
 
-#### `python -m cyber_sentry.cli playbooks`
+#### `python -m dexter_ai.cli playbooks`
 Lists all playbooks with descriptions.
 
-#### `python -m cyber_sentry.cli mcp <list|add|test|remove> [args]`
+#### `python -m dexter_ai.cli mcp <list|add|test|remove> [args]`
 Manages MCP server configuration.
 
 ### CLI Flags (all modes)
@@ -759,8 +759,8 @@ Manages MCP server configuration.
 
 ## 15. Streamlit Web UI
 
-**File:** `cyber_sentry/app.py`
-**Launch:** `make run` or `streamlit run cyber_sentry/app.py`
+**File:** `dexter_ai/app.py`
+**Launch:** `make run` or `streamlit run dexter_ai/app.py`
 **URL:** http://localhost:8501
 
 A dark-themed, professional-looking web interface.
@@ -812,8 +812,8 @@ Shows tool execution results with success/failure status and output text.
 
 ## 16. FastAPI REST Backend
 
-**File:** `cyber_sentry/api/main.py`
-**Launch:** `make run-api` or `uvicorn cyber_sentry.api.main:app --reload`
+**File:** `dexter_ai/api/main.py`
+**Launch:** `make run-api` or `uvicorn dexter_ai.api.main:app --reload`
 **URL:** http://localhost:8000
 
 Full REST API with WebSocket and Server-Sent Events support.
@@ -957,7 +957,7 @@ Every behaviour can be configured without touching code.
 | `ANTHROPIC_API_KEY` | — | Anthropic (Claude) API key |
 | `OPENROUTER_API_KEY` | — | OpenRouter API key |
 | `OPENROUTER_SITE_URL` | repo URL | Shown in OpenRouter dashboard |
-| `OPENROUTER_APP_TITLE` | `Cyber-Sentry AI` | Shown in OpenRouter dashboard |
+| `OPENROUTER_APP_TITLE` | `Dexter AI Pentest` | Shown in OpenRouter dashboard |
 | `AUTHORIZED_SCOPES` | `example.com,test.local,127.0.0.1,localhost` | Comma-separated list of targets the agent is allowed to scan |
 | `LOOT_DIR` | `./loot` | Where notes and reports are saved |
 | `SESSIONS_DIR` | `./sessions` | Where session data is saved |
@@ -987,7 +987,7 @@ super-duper-garbanzo/
 ├── 📁 loot/                        # ← All your findings and reports go here
 │   └── .gitkeep
 │
-├── 📁 cyber_sentry/
+├── 📁 dexter_ai/
 │   ├── __init__.py
 │   ├── main.py                     # ★ LangGraph agent (Supervisor→Guardrail→Planner→Tool→Reflect)
 │   ├── app.py                      # ★ Streamlit web UI
@@ -1061,4 +1061,4 @@ super-duper-garbanzo/
 
 ## Quick Summary
 
-In one paragraph: **Cyber-Sentry AI is an autonomous, multi-modal, AI-driven penetration testing platform.** It combines a LangGraph state-machine agent brain with real security tool execution (nmap, nikto, gobuster, nuclei, sqlmap, whois, dig), four specialized sub-agents (Recon/Vuln/Exploit/Report), seven safety guardrails, four LLM providers (including free local Ollama), four attack playbooks, a knowledge base for RAG context, web search, MCP server support, a full-featured CLI with an interactive REPL, a dark-themed Streamlit web UI, a FastAPI REST backend with WebSocket streaming, persistent JSON notes and SQLite session storage, Markdown report export, Docker Compose deployment, and a 56-test suite — all controlled by a single `.env` file.
+In one paragraph: **Dexter AI Pentest is an autonomous, multi-modal, AI-driven penetration testing platform.** It combines a LangGraph state-machine agent brain with real security tool execution (nmap, nikto, gobuster, nuclei, sqlmap, whois, dig), four specialized sub-agents (Recon/Vuln/Exploit/Report), seven safety guardrails, four LLM providers (including free local Ollama), four attack playbooks, a knowledge base for RAG context, web search, MCP server support, a full-featured CLI with an interactive REPL, a dark-themed Streamlit web UI, a FastAPI REST backend with WebSocket streaming, persistent JSON notes and SQLite session storage, Markdown report export, Docker Compose deployment, and a 56-test suite — all controlled by a single `.env` file.

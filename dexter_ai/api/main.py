@@ -1,6 +1,6 @@
 """
-Cyber-Sentry API
-FastAPI backend for the Red Team Cyber-Sentry AI Agent System
+Dexter AI Pentest API
+FastAPI backend for the Red Team Dexter AI Pentest Agent System
 """
 
 import asyncio
@@ -79,7 +79,7 @@ async def startup_event():
     for agent in factory.create_all_agents():
         orchestrator.register_agent(agent)
     
-    print("Cyber-Sentry AI System initialized")
+    print("Dexter AI Pentest System initialized")
     print(f"Registered agents: {orchestrator.list_agents()}")
     print(f"Available tools: {len(tool_registry.list_tools())}")
 
@@ -93,8 +93,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
 # Create FastAPI app
 app = FastAPI(
-    title="Cyber-Sentry AI",
-    description="Red Team Cyber-Sentry AI Agent System",
+    title="Dexter AI Pentest",
+    description="Red Team Dexter AI Pentest Agent System",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -113,9 +113,9 @@ app.add_middleware(
 @app.get("/", response_model=dict)
 async def root():
     return {
-        "name": "Cyber-Sentry AI",
+        "name": "Dexter AI Pentest",
         "version": "1.0.0",
-        "description": "Red Team Cyber-Sentry AI Agent System",
+        "description": "Red Team Dexter AI Pentest Agent System",
         "status": "operational"
     }
 
@@ -308,4 +308,4 @@ async def health_check():
     )
 
 
-# Run with: uvicorn cyber_sentry.api.main:app --reload
+# Run with: uvicorn dexter_ai.api.main:app --reload

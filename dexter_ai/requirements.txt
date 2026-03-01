@@ -1,4 +1,4 @@
-# Cyber-Sentry AI - Requirements
+# Dexter AI Pentest - Requirements
 # Full Stack for LangGraph + Ollama/OpenAI/Anthropic/OpenRouter + Streamlit
 
 # Core LangGraph & LangChain

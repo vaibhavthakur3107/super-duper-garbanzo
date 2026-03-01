@@ -1,6 +1,6 @@
 version: "3.9"
 
-# ── Cyber-Sentry AI – Docker Compose ──────────────────────────────────────────
+# ── Dexter AI Pentest – Docker Compose ──────────────────────────────────────────
 # Usage:
 #   docker compose up            # Start Streamlit UI (http://localhost:8501)
 #   docker compose up api        # Start FastAPI backend (http://localhost:8000)
@@ -10,7 +10,7 @@ services:
   # ── Streamlit web UI ────────────────────────────────────────────────────────
   ui:
     build: .
-    image: cyber-sentry:latest
+    image: dexter-ai:latest
     ports:
       - "8501:8501"
     environment:
@@ -20,7 +20,7 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OPENROUTER_SITE_URL=${OPENROUTER_SITE_URL:-}
-      - OPENROUTER_APP_TITLE=${OPENROUTER_APP_TITLE:-Cyber-Sentry AI}
+      - OPENROUTER_APP_TITLE=${OPENROUTER_APP_TITLE:-Dexter AI Pentest}
       - AUTHORIZED_SCOPES=${AUTHORIZED_SCOPES:-example.com,test.local,127.0.0.1,localhost}
     volumes:
       - ./loot:/app/loot
@@ -29,7 +29,7 @@ services:
       - ollama
     restart: unless-stopped
     command: >
-      streamlit run cyber_sentry/app.py
+      streamlit run dexter_ai/app.py
       --server.address=0.0.0.0
       --server.port=8501
       --server.headless=true
@@ -37,7 +37,7 @@ services:
   # ── FastAPI REST backend ─────────────────────────────────────────────────────
   api:
     build: .
-    image: cyber-sentry:latest
+    image: dexter-ai:latest
     ports:
       - "8000:8000"
     environment:
@@ -54,13 +54,13 @@ services:
       - ollama
     restart: unless-stopped
     command: >
-      uvicorn cyber_sentry.api.main:app
+      uvicorn dexter_ai.api.main:app
       --host 0.0.0.0 --port 8000 --reload
 
   # ── One-shot CLI container ────────────────────────────────────────────────────
   cli:
     build: .
-    image: cyber-sentry:latest
+    image: dexter-ai:latest
     environment:
       - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
@@ -77,7 +77,7 @@ services:
       - cli
     stdin_open: true
     tty: true
-    command: python -m cyber_sentry.cli
+    command: python -m dexter_ai.cli
 
   # ── Local Ollama (optional, used when LLM_PROVIDER=ollama) ───────────────────
   ollama:

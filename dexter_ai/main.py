@@ -1,5 +1,5 @@
 """
-Cyber-Sentry AI - LangGraph Core Application
+Dexter AI Pentest - LangGraph Core Application
 Multi-agent pentesting system with local LLM inference via Ollama,
 or cloud inference via OpenAI / Anthropic / OpenRouter.
 """
@@ -47,7 +47,7 @@ from .providers import (
     get_llm,
 )
 
-# Re-export so callers can still do:  from cyber_sentry.main import get_llm, PROVIDER_*
+# Re-export so callers can still do:  from dexter_ai.main import get_llm, PROVIDER_*
 __all__ = [
     "run_pentest",
     "get_llm",

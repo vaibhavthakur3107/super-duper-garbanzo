@@ -1,4 +1,4 @@
-# 🛡️ Cyber-Sentry AI — Complete Project Overview
+# 🛡️ Dexter AI Pentest — Complete Project Overview
 
 > **AI-Powered Red Team Pentesting Agent** built with LangGraph multi-agent orchestration.
 
@@ -6,7 +6,7 @@
 
 ## 📋 Table of Contents
 
-1. [What Is Cyber-Sentry AI?](#what-is-cyber-sentry-ai)
+1. [What Is Dexter AI Pentest?](#what-is-dexter-ai-pentest)
 2. [What Can It Do?](#what-can-it-do)
 3. [How Does It Work?](#how-does-it-work)
 4. [Architecture & Tech Stack](#architecture--tech-stack)
@@ -23,13 +23,13 @@
 
 ---
 
-## What Is Cyber-Sentry AI?
+## What Is Dexter AI Pentest?
 
-**Cyber-Sentry AI** is an autonomous red team penetration testing agent that uses **AI (Large Language Models)** to plan, execute, and analyze security assessments — just like a human penetration tester would, but automated.
+**Dexter AI Pentest** is an autonomous red team penetration testing agent that uses **AI (Large Language Models)** to plan, execute, and analyze security assessments — just like a human penetration tester would, but automated.
 
 Think of it like this:
 - A human pentester thinks → picks a tool → runs it → analyzes results → decides next step.
-- Cyber-Sentry AI does the **exact same loop**, but powered by an LLM (like GPT-4, Claude, Llama 3, or 200+ models via OpenRouter).
+- Dexter AI Pentest does the **exact same loop**, but powered by an LLM (like GPT-4, Claude, Llama 3, or 200+ models via OpenRouter).
 
 It uses **LangGraph** (a state-machine framework for AI agents) to orchestrate a multi-agent pipeline:
 
@@ -215,7 +215,7 @@ cp .env.example .env
 # Edit .env with your API keys, or use Ollama (free, local)
 
 # Run the CLI
-python -m cyber_sentry.cli
+python -m dexter_ai.cli
 
 # Or use the Makefile shortcuts
 make run-cli    # Interactive CLI
@@ -243,8 +243,8 @@ docker compose run --rm cli  # Interactive CLI
 # Install Ollama: https://ollama.ai
 ollama pull llama3
 
-# Run Cyber-Sentry
-python -m cyber_sentry.cli
+# Run Dexter AI Pentest
+python -m dexter_ai.cli
 ```
 
 ---
@@ -254,7 +254,7 @@ python -m cyber_sentry.cli
 ### Interactive Mode (REPL)
 
 ```
-⚡cyber-sentry> /help
+⚡dexter-ai> /help
 
 ═══ COMMANDS ═══
 
@@ -286,10 +286,10 @@ Navigation
 ### Example Session
 
 ```
-⚡cyber-sentry> /target testphp.vulnweb.com
+⚡dexter-ai> /target testphp.vulnweb.com
 [✓] Target set: testphp.vulnweb.com
 
-⚡cyber-sentry[testphp.vulnweb.com]> /playbook web_pentest
+⚡dexter-ai[testphp.vulnweb.com]> /playbook web_pentest
 [*] Starting agent on target: testphp.vulnweb.com
 [*] Task: Comprehensive web application penetration test
 [*] Provider: ollama / Model: llama3
@@ -298,13 +298,13 @@ Navigation
 
 [✓] Assessment complete. 8 reasoning steps recorded in 45.2s.
 
-⚡cyber-sentry[testphp.vulnweb.com]> /notes
+⚡dexter-ai[testphp.vulnweb.com]> /notes
   [VULNERABILITY] SQL injection found in login form
   [VULNERABILITY] XSS reflected in search parameter
   [FINDING] Apache/2.4.7 detected, outdated version
   [FINDING] Missing security headers: CSP, HSTS
 
-⚡cyber-sentry[testphp.vulnweb.com]> /report
+⚡dexter-ai[testphp.vulnweb.com]> /report
 [✓] Report saved to: loot/report_20260301_060816.md
 ```
 
@@ -312,10 +312,10 @@ Navigation
 
 ```bash
 # Run a specific playbook and generate report
-python -m cyber_sentry.cli run -t testphp.vulnweb.com --playbook web_pentest --report
+python -m dexter_ai.cli run -t testphp.vulnweb.com --playbook web_pentest --report
 
 # Custom task
-python -m cyber_sentry.cli run -t testphp.vulnweb.com --task "Check for SQL injection"
+python -m dexter_ai.cli run -t testphp.vulnweb.com --task "Check for SQL injection"
 ```
 
 ---
@@ -332,7 +332,7 @@ Start it with:
 ```bash
 make run
 # or
-streamlit run cyber_sentry/app.py
+streamlit run dexter_ai/app.py
 ```
 
 Access at **http://localhost:8501**
@@ -357,7 +357,7 @@ Start it with:
 ```bash
 make run-api
 # or
-uvicorn cyber_sentry.api.main:app --reload
+uvicorn dexter_ai.api.main:app --reload
 ```
 
 Access at **http://localhost:8000** (API docs at `/docs`)
@@ -368,7 +368,7 @@ Access at **http://localhost:8000** (API docs at `/docs`)
 
 `testphp.vulnweb.com` is a **legal, authorized** test website by Acunetix designed for security testing practice. It has intentional vulnerabilities like SQL injection, XSS, file inclusion, etc.
 
-### What Cyber-Sentry AI Finds
+### What Dexter AI Pentest Finds
 
 When you run `web_pentest` playbook against `testphp.vulnweb.com`, the agent typically discovers:
 
@@ -389,7 +389,7 @@ When you run `web_pentest` playbook against `testphp.vulnweb.com`, the agent typ
 The built-in browser agent (no Selenium required) can:
 
 ```python
-from cyber_sentry.browser_agent import BrowserAgent
+from dexter_ai.browser_agent import BrowserAgent
 agent = BrowserAgent()
 
 # Analyze security headers
@@ -415,7 +415,7 @@ cors = agent.check_cors("http://testphp.vulnweb.com/")
 
 ```
 super-duper-garbanzo/
-├── cyber_sentry/                  # Main package
+├── dexter_ai/                  # Main package
 │   ├── __init__.py                # Package init (version = 2.0.0)
 │   ├── main.py                    # LangGraph core — state machine orchestration
 │   ├── cli.py                     # Interactive REPL command-line interface
@@ -523,7 +523,7 @@ super-duper-garbanzo/
 
 ```
   ╔════════════════════════════════════════════════════════╗
-  ║  CYBER-SENTRY AI v2.0.0 — STATUS DASHBOARD           ║
+  ║  DEXTER AI PENTEST v2.0.0 — STATUS DASHBOARD           ║
   ╠════════════════════════════════════════════════════════╣
   ║  🎯 Target: testphp.vulnweb.com   Status: ACTIVE     ║
   ║  🔧 Tools:  151+                  Agents: 12+        ║
@@ -549,7 +549,7 @@ super-duper-garbanzo/
 ### Agent Task Execution
 
 ```
-⚡cyber-sentry[testphp.vulnweb.com]> /agent Scan for web vulnerabilities
+⚡dexter-ai[testphp.vulnweb.com]> /agent Scan for web vulnerabilities
 
 [*] Starting agent on target: testphp.vulnweb.com
 [*] Task: Scan for web vulnerabilities
@@ -626,7 +626,7 @@ tests/test_core.py::TestCLIEnhancements (11 tests)          PASSED
 
 ### 🔹 Q1: "What problem does your project solve?"
 
-**A:** Manual penetration testing is time-consuming, expensive, and requires deep expertise. Cyber-Sentry AI automates the entire pentest workflow using AI agents that think, plan, and execute security assessments autonomously — making security testing accessible and faster.
+**A:** Manual penetration testing is time-consuming, expensive, and requires deep expertise. Dexter AI Pentest automates the entire pentest workflow using AI agents that think, plan, and execute security assessments autonomously — making security testing accessible and faster.
 
 ---
 
@@ -634,7 +634,7 @@ tests/test_core.py::TestCLIEnhancements (11 tests)          PASSED
 
 **A:** Great question! The key difference is **intelligence and autonomy**:
 - Manual tools: You run one tool, read the output, decide what to do next.
-- Cyber-Sentry AI: The AI agent **analyzes the output**, **decides the next step**, and **chains tools together** intelligently. It's like having an AI security expert making decisions for you.
+- Dexter AI Pentest: The AI agent **analyzes the output**, **decides the next step**, and **chains tools together** intelligently. It's like having an AI security expert making decisions for you.
 
 For example, if nmap finds port 80 open with PHP, the AI automatically decides to run nikto for web vulnerabilities, then sqlmap if it detects potential SQL injection points.
 
@@ -759,7 +759,7 @@ These agents are orchestrated by the **LangGraph state machine** and can be comb
 ### 🔹 Q12: "Can you demo it live?"
 
 **A:** Yes! Three ways:
-1. **CLI**: `python -m cyber_sentry.cli -t testphp.vulnweb.com` → `/playbook web_pentest`
+1. **CLI**: `python -m dexter_ai.cli -t testphp.vulnweb.com` → `/playbook web_pentest`
 2. **Web UI**: `make run` → Open http://localhost:8501 → Enter target → Start scan
 3. **API**: `curl -X POST http://localhost:8000/tasks -d '{"task":"scan","target":"testphp.vulnweb.com"}'`
 
@@ -791,7 +791,7 @@ These agents are orchestrated by the **LangGraph state machine** and can be comb
 
 ## Why This Project Stands Out
 
-| Aspect | Cyber-Sentry AI | Traditional Tools |
+| Aspect | Dexter AI Pentest | Traditional Tools |
 |--------|-----------------|-------------------|
 | **Intelligence** | AI decides next steps | You decide manually |
 | **Autonomy** | Runs end-to-end | One tool at a time |
@@ -804,5 +804,5 @@ These agents are orchestrated by the **LangGraph state machine** and can be comb
 
 ---
 
-*This document is part of the [Cyber-Sentry AI](https://github.com/vaibhavthakur3107/super-duper-garbanzo) project.*
+*This document is part of the [Dexter AI Pentest](https://github.com/vaibhavthakur3107/super-duper-garbanzo) project.*
 *Version 2.0.0 — 151+ tools, 12+ agents, 7 playbooks, 165 tests.*

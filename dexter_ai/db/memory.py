@@ -14,7 +14,7 @@ from pathlib import Path
 class ConversationMemory:
     """SQLite-backed conversation memory"""
     
-    def __init__(self, db_path: str = "cyber_sentry.db"):
+    def __init__(self, db_path: str = "dexter_ai.db"):
         self.db_path = db_path
         self._init_db()
     

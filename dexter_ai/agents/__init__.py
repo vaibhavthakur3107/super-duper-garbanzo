@@ -1,5 +1,5 @@
 """
-Cyber-Sentry AI - Core Agent System
+Dexter AI Pentest - Core Agent System
 Multi-agent architecture with ReAct reasoning for red team operations
 """
 
