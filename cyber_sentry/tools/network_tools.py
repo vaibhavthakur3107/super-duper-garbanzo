@@ -88,6 +88,8 @@ def sanitize_command(command: str) -> Tuple[bool, str]:
         # Infrastructure/Misc
         'ansible-lint', 'lynis', 'chkrootkit', 'rkhunter',
         'clamscan', 'yara', 'osqueryi', 'velociraptor',
+        # Additional Reconnaissance
+        'dnsrecon', 'whatportis',
         # Shell utils
         'echo',
     ]
@@ -1333,6 +1335,20 @@ def velociraptor(command: str, target: str) -> str:
     return run_command(command, timeout=60)
 
 
+def dnsrecon(command: str, target: str) -> str:
+    """DNS enumeration, zone transfer testing, and record brute-forcing."""
+    if not command or command == "dnsrecon":
+        command = f"dnsrecon -d {target} -t std"
+    return run_command(command, timeout=120)
+
+
+def whatportis(command: str, target: str) -> str:
+    """Port and service name lookup database."""
+    if not command or command == "whatportis":
+        command = f"whatportis {target} --like"
+    return run_command(command, timeout=15)
+
+
 def web_search(query: str, target: str = "") -> str:
     """
     Perform a web search using Tavily API (like PentestAgent).
@@ -2166,6 +2182,17 @@ class ToolRegistry:
                 "function": yara_scan,
                 "description": "YARA rule-based malware pattern matching",
                 "category": "infrastructure",
+            },
+            # ── Additional Reconnaissance ─────────────────────────────────
+            "dnsrecon": {
+                "function": dnsrecon,
+                "description": "DNS enumeration, zone transfer testing, and record brute-forcing",
+                "category": "reconnaissance",
+            },
+            "whatportis": {
+                "function": whatportis,
+                "description": "Port and service name lookup database",
+                "category": "reconnaissance",
             },
         }
     
