@@ -23,6 +23,11 @@ _SEVERITY_WEIGHTS = {
     "info": 0.5,
 }
 
+# Risk scoring constants
+_MAX_RISK_SCORE = 10.0          # Maximum possible score
+_VOLUME_WEIGHT = 0.5            # Per-finding volume bonus
+_MAX_VOLUME_BONUS = 4.0         # Cap on the volume bonus
+
 # Built-in exploitation guide templates by vulnerability type
 _EXPLOITATION_TEMPLATES = {
     "sqli": {
@@ -256,7 +261,7 @@ class ReportGenerator:
         for f in findings:
             sev = _severity_from_finding(f)
             total += _SEVERITY_WEIGHTS.get(sev, 2.0)
-        score = min(10.0, total / max(len(findings), 1) + min(len(findings) * 0.5, 4.0))
+        score = min(_MAX_RISK_SCORE, total / max(len(findings), 1) + min(len(findings) * _VOLUME_WEIGHT, _MAX_VOLUME_BONUS))
         return round(score, 1)
 
     def generate_exploitation_guide(self, finding: dict) -> str:

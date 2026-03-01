@@ -945,7 +945,8 @@ class TestCLIEnhancements:
 
     def test_banner_contains_version(self):
         from cyber_sentry.cli import BANNER
-        assert "2.0.0" in BANNER or "v" in BANNER
+        from cyber_sentry import __version__
+        assert __version__ in BANNER
 
     def test_banner_has_tool_count(self):
         from cyber_sentry.cli import BANNER
