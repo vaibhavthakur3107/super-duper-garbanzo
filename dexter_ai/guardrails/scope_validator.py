@@ -20,6 +20,7 @@ AUTHORIZED_SCOPES = [
     "172.16.0.0/12",
     "testphp.vulnweb.com",
     "vulnweb.com",
+    "test.vulnweb.com",
 ]
 
 
