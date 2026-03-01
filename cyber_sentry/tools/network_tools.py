@@ -57,6 +57,39 @@ def sanitize_command(command: str) -> Tuple[bool, str]:
         # Cloud
         'prowler', 'trivy', 'kube-hunter', 'docker-bench-security',
         'cloud_enum',
+        # API Security
+        'graphql-cop', 'newman', 'restler', 'swagger-cli',
+        'oauth-tester', 'cors-scanner',
+        'rate-limit-tester', 'wsdl-analyzer', 'grpc_cli',
+        # Wireless Security
+        'aircrack-ng', 'wifite', 'kismet', 'bettercap', 'reaver',
+        'wash', 'mdk4', 'hostapd-wpe',
+        # Mobile Security
+        'apktool', 'jadx', 'frida', 'objection', 'mobsf',
+        'drozer', 'ios-deploy', 'needle',
+        # Additional Network
+        'responder', 'mitm6', 'tcpdump', 'tshark', 'nc', 'netcat',
+        'snmpwalk', 'onesixtyone',
+        # Additional Web
+        'xsstrike', 'nosqlmap', 'ssrf-detect', 'lfi-detect',
+        'xxe-detect', 'crlfuzz', 'open-redirect-scanner',
+        'host-header-check', 'clickjack-test', 'subjack',
+        # Exploitation
+        'msfconsole', 'searchsploit', 'msfvenom', 'impacket',
+        'bloodhound-python', 'mimikatz',
+        # CTF
+        'ROPgadget', 'one_gadget', 'z3', 'stegsolve', 'zsteg',
+        # Additional Cloud/Container
+        'scout', 'pacu', 'cloudsploit', 'terraform-compliance',
+        'checkov', 'falco',
+        # Additional OSINT
+        'maltego', 'censys', 'hunter', 'dnsdumpster',
+        'wayback-discover', 'linkedin-scraper', 'github-dorking',
+        # Infrastructure/Misc
+        'ansible-lint', 'lynis', 'chkrootkit', 'rkhunter',
+        'clamscan', 'yara', 'osqueryi', 'velociraptor',
+        # Additional Reconnaissance
+        'dnsrecon', 'whatportis',
         # Shell utils
         'echo',
     ]
@@ -688,6 +721,634 @@ def cloud_enum(command: str, target: str) -> str:
     return run_command(command, timeout=300)
 
 
+# ============================================================================
+# API Security Testing Tools
+# ============================================================================
+
+def graphql_introspection(command: str, target: str) -> str:
+    """GraphQL schema introspection and analysis."""
+    if not command or command == "graphql-cop":
+        command = f"graphql-cop -t http://{target}/graphql"
+    return run_command(command, timeout=120)
+
+
+def postman_collection_runner(command: str, target: str) -> str:
+    """API endpoint testing from Postman collections."""
+    if not command or command == "newman":
+        command = f"newman run {target} --reporters cli"
+    return run_command(command, timeout=300)
+
+
+def rest_api_fuzzer(command: str, target: str) -> str:
+    """REST API parameter and endpoint fuzzing."""
+    if not command or command == "restler":
+        command = f"restler fuzz --grammar_file {target} --time_budget 1"
+    return run_command(command, timeout=600)
+
+
+def swagger_scanner(command: str, target: str) -> str:
+    """OpenAPI/Swagger specification vulnerability scanning."""
+    if not command or command == "swagger-cli":
+        command = f"swagger-cli validate {target}"
+    return run_command(command, timeout=120)
+
+
+def oauth_tester(command: str, target: str) -> str:
+    """OAuth 2.0 flow and token security testing."""
+    if not command or command == "oauth-tester":
+        command = f"oauth-tester --url http://{target} --scan-all"
+    return run_command(command, timeout=120)
+
+
+def cors_scanner(command: str, target: str) -> str:
+    """Cross-Origin Resource Sharing misconfiguration testing."""
+    if not command or command == "cors-scanner":
+        command = f"cors-scanner -u http://{target}"
+    return run_command(command, timeout=60)
+
+
+def graphql_cop(command: str, target: str) -> str:
+    """GraphQL security auditing tool."""
+    if not command or command == "graphql-cop":
+        command = f"graphql-cop -t http://{target}/graphql --no-colour"
+    return run_command(command, timeout=120)
+
+
+def api_rate_limit_tester(command: str, target: str) -> str:
+    """API rate limiting and throttling analysis."""
+    if not command or command == "rate-limit-tester":
+        command = f"rate-limit-tester -u http://{target} -n 100"
+    return run_command(command, timeout=120)
+
+
+def soap_scanner(command: str, target: str) -> str:
+    """SOAP/XML web service security testing."""
+    if not command or command == "wsdl-analyzer":
+        command = f"wsdl-analyzer --url http://{target}?wsdl --scan"
+    return run_command(command, timeout=120)
+
+
+def grpc_scanner(command: str, target: str) -> str:
+    """gRPC service enumeration and testing."""
+    if not command or command == "grpc_cli":
+        command = f"grpc_cli ls {target} --l"
+    return run_command(command, timeout=60)
+
+
+# ============================================================================
+# Wireless Security Tools
+# ============================================================================
+
+def aircrack_ng(command: str, target: str) -> str:
+    """WiFi network analysis and security testing."""
+    if not command or command == "aircrack-ng":
+        command = f"aircrack-ng --help"
+    return run_command(command, timeout=30)
+
+
+def wifite(command: str, target: str) -> str:
+    """Automated wireless attack tool."""
+    if not command or command == "wifite":
+        command = f"wifite --kill --dict /usr/share/wordlists/rockyou.txt -i {target}"
+    return run_command(command, timeout=600)
+
+
+def kismet(command: str, target: str) -> str:
+    """Wireless network detector and sniffer."""
+    if not command or command == "kismet":
+        command = f"kismet -c {target} --no-ncurses"
+    return run_command(command, timeout=300)
+
+
+def bettercap(command: str, target: str) -> str:
+    """Network attack and monitoring framework."""
+    if not command or command == "bettercap":
+        command = f"bettercap -iface {target} -eval 'net.probe on; sleep 5; net.show; quit'"
+    return run_command(command, timeout=120)
+
+
+def reaver(command: str, target: str) -> str:
+    """WPS PIN brute-force attack tool."""
+    if not command or command == "reaver":
+        command = f"reaver -i {target} -b 00:00:00:00:00:00 -vv"
+    return run_command(command, timeout=600)
+
+
+def wash_scan(command: str, target: str) -> str:
+    """WPS-enabled network scanner."""
+    if not command or command == "wash":
+        command = f"wash -i {target}"
+    return run_command(command, timeout=60)
+
+
+def mdk4(command: str, target: str) -> str:
+    """WiFi denial-of-service testing tool."""
+    if not command or command == "mdk4":
+        command = f"mdk4 {target} b -c 1"
+    return run_command(command, timeout=60)
+
+
+def hostapd_wpe(command: str, target: str) -> str:
+    """Rogue access point for credential capture."""
+    if not command or command == "hostapd-wpe":
+        command = f"hostapd-wpe {target}"
+    return run_command(command, timeout=300)
+
+
+# ============================================================================
+# Mobile Security Tools
+# ============================================================================
+
+def apktool(command: str, target: str) -> str:
+    """Android APK reverse engineering."""
+    if not command or command == "apktool":
+        command = f"apktool d {target} -o /tmp/apktool_output"
+    return run_command(command, timeout=120)
+
+
+def jadx(command: str, target: str) -> str:
+    """Android DEX to Java decompiler."""
+    if not command or command == "jadx":
+        command = f"jadx -d /tmp/jadx_output {target}"
+    return run_command(command, timeout=120)
+
+
+def frida(command: str, target: str) -> str:
+    """Dynamic instrumentation toolkit."""
+    if not command or command == "frida":
+        command = f"frida --list-devices"
+    return run_command(command, timeout=30)
+
+
+def objection(command: str, target: str) -> str:
+    """Runtime mobile exploration."""
+    if not command or command == "objection":
+        command = f"objection -g {target} explore"
+    return run_command(command, timeout=120)
+
+
+def mobsf(command: str, target: str) -> str:
+    """Mobile Security Framework automated analysis."""
+    if not command or command == "mobsf":
+        command = f"mobsf --scan {target}"
+    return run_command(command, timeout=600)
+
+
+def drozer(command: str, target: str) -> str:
+    """Android security assessment framework."""
+    if not command or command == "drozer":
+        command = f"drozer console connect --server {target}"
+    return run_command(command, timeout=120)
+
+
+def ios_deploy(command: str, target: str) -> str:
+    """iOS application deployment and testing."""
+    if not command or command == "ios-deploy":
+        command = f"ios-deploy --bundle {target}"
+    return run_command(command, timeout=120)
+
+
+def needle(command: str, target: str) -> str:
+    """iOS security testing framework."""
+    if not command or command == "needle":
+        command = f"needle -t {target}"
+    return run_command(command, timeout=300)
+
+
+# ============================================================================
+# Additional Network Tools
+# ============================================================================
+
+def responder(command: str, target: str) -> str:
+    """LLMNR/NBT-NS/MDNS poisoner."""
+    if not command or command == "responder":
+        command = f"responder -I {target} -A"
+    return run_command(command, timeout=300)
+
+
+def mitm6(command: str, target: str) -> str:
+    """IPv6 DNS takeover via mitm."""
+    if not command or command == "mitm6":
+        command = f"mitm6 -d {target}"
+    return run_command(command, timeout=300)
+
+
+def bettercap_net(command: str, target: str) -> str:
+    """Network monitoring and MITM."""
+    if not command or command == "bettercap":
+        command = f"bettercap -T {target} -eval 'net.sniff on; sleep 10; quit'"
+    return run_command(command, timeout=120)
+
+
+def tcpdump(command: str, target: str) -> str:
+    """Network packet capture and analysis."""
+    if not command or command == "tcpdump":
+        command = f"tcpdump -i any -c 100 host {target} -nn"
+    return run_command(command, timeout=60)
+
+
+def wireshark_cli(command: str, target: str) -> str:
+    """TShark packet analysis."""
+    if not command or command == "tshark":
+        command = f"tshark -i any -c 100 -f 'host {target}'"
+    return run_command(command, timeout=60)
+
+
+def netcat_scan(command: str, target: str) -> str:
+    """Netcat port scanning and banner grabbing."""
+    if not command or command == "nc":
+        command = f"nc -zv {target} 1-1024 2>&1"
+    return run_command(command, timeout=120)
+
+
+def snmpwalk(command: str, target: str) -> str:
+    """SNMP enumeration and information gathering."""
+    if not command or command == "snmpwalk":
+        command = f"snmpwalk -v2c -c public {target}"
+    return run_command(command, timeout=120)
+
+
+def onesixtyone(command: str, target: str) -> str:
+    """Fast SNMP community string scanner."""
+    if not command or command == "onesixtyone":
+        command = f"onesixtyone {target} public private"
+    return run_command(command, timeout=60)
+
+
+# ============================================================================
+# Additional Web Application Tools
+# ============================================================================
+
+def xsstrike(command: str, target: str) -> str:
+    """Advanced XSS detection suite."""
+    if not command or command == "xsstrike":
+        command = f"xsstrike -u http://{target} --crawl"
+    return run_command(command, timeout=300)
+
+
+def nosql_injection(command: str, target: str) -> str:
+    """NoSQL injection detection."""
+    if not command or command == "nosqlmap":
+        command = f"nosqlmap -u http://{target} --attack 1"
+    return run_command(command, timeout=300)
+
+
+def ssrf_scanner(command: str, target: str) -> str:
+    """SSRF vulnerability detection."""
+    if not command or command == "ssrf-detect":
+        command = f"ssrf-detect -u http://{target}"
+    return run_command(command, timeout=120)
+
+
+def lfi_scanner(command: str, target: str) -> str:
+    """Local File Inclusion testing."""
+    if not command or command == "lfi-detect":
+        command = f"lfi-detect -u http://{target} --depth 5"
+    return run_command(command, timeout=120)
+
+
+def xxe_scanner(command: str, target: str) -> str:
+    """XML External Entity injection testing."""
+    if not command or command == "xxe-detect":
+        command = f"xxe-detect -u http://{target}"
+    return run_command(command, timeout=120)
+
+
+def crlf_scanner(command: str, target: str) -> str:
+    """CRLF injection detection."""
+    if not command or command == "crlfuzz":
+        command = f"crlfuzz -u http://{target}"
+    return run_command(command, timeout=120)
+
+
+def open_redirect_scanner(command: str, target: str) -> str:
+    """Open redirect vulnerability testing."""
+    if not command or command == "open-redirect-scanner":
+        command = f"open-redirect-scanner -u http://{target}"
+    return run_command(command, timeout=120)
+
+
+def host_header_injection(command: str, target: str) -> str:
+    """Host header injection testing."""
+    if not command or command == "host-header-check":
+        command = f"host-header-check -u http://{target}"
+    return run_command(command, timeout=60)
+
+
+def clickjacking_tester(command: str, target: str) -> str:
+    """Clickjacking vulnerability testing."""
+    if not command or command == "clickjack-test":
+        command = f"clickjack-test -u http://{target}"
+    return run_command(command, timeout=60)
+
+
+def subdomain_takeover(command: str, target: str) -> str:
+    """Subdomain takeover detection."""
+    if not command or command == "subjack":
+        command = f"subjack -d {target} -ssl -v"
+    return run_command(command, timeout=300)
+
+
+# ============================================================================
+# Exploitation Tools
+# ============================================================================
+
+def metasploit(command: str, target: str) -> str:
+    """Metasploit framework console."""
+    if not command or command == "msfconsole":
+        command = f"msfconsole -q -x 'search {target}; exit'"
+    return run_command(command, timeout=120)
+
+
+def searchsploit(command: str, target: str) -> str:
+    """Exploit-DB offline search."""
+    if not command or command == "searchsploit":
+        command = f"searchsploit {target}"
+    return run_command(command, timeout=30)
+
+
+def msfvenom(command: str, target: str) -> str:
+    """Payload generation with Metasploit."""
+    if not command or command == "msfvenom":
+        command = f"msfvenom --list payloads | grep {target}"
+    return run_command(command, timeout=60)
+
+
+def responder_exploit(command: str, target: str) -> str:
+    """LLMNR/NBT-NS poisoning attacks."""
+    if not command or command == "responder":
+        command = f"responder -I {target} -wrf"
+    return run_command(command, timeout=300)
+
+
+def impacket_tools(command: str, target: str) -> str:
+    """Network protocol exploitation suite."""
+    if not command or command == "impacket":
+        command = f"impacket-smbclient {target}"
+    return run_command(command, timeout=120)
+
+
+def crackmapexec(command: str, target: str) -> str:
+    """Network service exploitation (legacy)."""
+    if not command or command == "crackmapexec":
+        command = f"crackmapexec smb {target} --shares"
+    return run_command(command, timeout=120)
+
+
+def bloodhound(command: str, target: str) -> str:
+    """Active Directory attack path analysis."""
+    if not command or command == "bloodhound-python":
+        command = f"bloodhound-python -d {target} -c All"
+    return run_command(command, timeout=300)
+
+
+def mimikatz(command: str, target: str) -> str:
+    """Windows credential extraction (for reference)."""
+    if not command or command == "mimikatz":
+        command = f"mimikatz 'privilege::debug' 'sekurlsa::logonpasswords' 'exit'"
+    return run_command(command, timeout=60)
+
+
+# ============================================================================
+# CTF Tools
+# ============================================================================
+
+def pwntools(command: str, target: str) -> str:
+    """CTF exploitation framework."""
+    if not command or command == "python3":
+        command = f"python3 -c 'from pwn import *; print(cyclic(100))'"
+    return run_command(command, timeout=30)
+
+
+def ropgadget(command: str, target: str) -> str:
+    """ROP gadget finder for binary exploitation."""
+    if not command or command == "ROPgadget":
+        command = f"ROPgadget --binary {target}"
+    return run_command(command, timeout=120)
+
+
+def one_gadget(command: str, target: str) -> str:
+    """Find one-shot gadgets in libc."""
+    if not command or command == "one_gadget":
+        command = f"one_gadget {target}"
+    return run_command(command, timeout=60)
+
+
+def z3_solver(command: str, target: str) -> str:
+    """Z3 SMT solver for crypto/reversing challenges."""
+    if not command or command == "z3":
+        command = f"python3 -c 'from z3 import *; print(get_version_string())'"
+    return run_command(command, timeout=30)
+
+
+def stegsolve(command: str, target: str) -> str:
+    """Steganography analysis tool."""
+    if not command or command == "stegsolve":
+        command = f"stegsolve -f {target}"
+    return run_command(command, timeout=60)
+
+
+def zsteg(command: str, target: str) -> str:
+    """PNG/BMP steganography detection."""
+    if not command or command == "zsteg":
+        command = f"zsteg {target}"
+    return run_command(command, timeout=60)
+
+
+def john_wordlist(command: str, target: str) -> str:
+    """Custom wordlist generation with John."""
+    if not command or command == "john":
+        command = f"john --wordlist=/usr/share/wordlists/rockyou.txt --rules --stdout | head -1000"
+    return run_command(command, timeout=60)
+
+
+def cyberchef(command: str, target: str) -> str:
+    """Data encoding/decoding Swiss Army knife."""
+    if not command or command == "python3":
+        command = f"python3 -c \"import base64; print(base64.b64decode('{target}').decode('utf-8', errors='replace'))\""
+    return run_command(command, timeout=15)
+
+
+# ============================================================================
+# Additional Cloud & Container Security Tools
+# ============================================================================
+
+def scout_suite(command: str, target: str) -> str:
+    """Multi-cloud security auditing."""
+    if not command or command == "scout":
+        command = f"scout aws --report-dir /tmp/scout_report"
+    return run_command(command, timeout=600)
+
+
+def pacu(command: str, target: str) -> str:
+    """AWS exploitation framework."""
+    if not command or command == "pacu":
+        command = f"pacu --help"
+    return run_command(command, timeout=30)
+
+
+def cloudsploit(command: str, target: str) -> str:
+    """Cloud security configuration scanner."""
+    if not command or command == "cloudsploit":
+        command = f"cloudsploit scan --config {target}"
+    return run_command(command, timeout=600)
+
+
+def terraform_compliance(command: str, target: str) -> str:
+    """Terraform security compliance checking."""
+    if not command or command == "terraform-compliance":
+        command = f"terraform-compliance -f {target} -p plan.out"
+    return run_command(command, timeout=120)
+
+
+def checkov(command: str, target: str) -> str:
+    """IaC static analysis for security."""
+    if not command or command == "checkov":
+        command = f"checkov -d {target} --quiet"
+    return run_command(command, timeout=300)
+
+
+def falco(command: str, target: str) -> str:
+    """Container runtime security monitoring."""
+    if not command or command == "falco":
+        command = f"falco --list"
+    return run_command(command, timeout=30)
+
+
+# ============================================================================
+# Additional OSINT Tools
+# ============================================================================
+
+def maltego(command: str, target: str) -> str:
+    """OSINT and link analysis."""
+    if not command or command == "maltego":
+        command = f"maltego --help"
+    return run_command(command, timeout=30)
+
+
+def censys_search(command: str, target: str) -> str:
+    """Censys internet device search."""
+    if not command or command == "censys":
+        command = f"censys search {target}"
+    return run_command(command, timeout=60)
+
+
+def hunter_io(command: str, target: str) -> str:
+    """Email address finder."""
+    if not command or command == "hunter":
+        command = f"hunter --domain {target}"
+    return run_command(command, timeout=60)
+
+
+def haveibeenpwned(command: str, target: str) -> str:
+    """Breach database checker."""
+    if not command or command == "python3":
+        command = f"curl -s 'https://haveibeenpwned.com/api/v3/breachedaccount/{target}' -H 'hibp-api-key: test'"
+    return run_command(command, timeout=30)
+
+
+def dnsdumpster(command: str, target: str) -> str:
+    """DNS reconnaissance."""
+    if not command or command == "dnsdumpster":
+        command = f"dnsdumpster -d {target}"
+    return run_command(command, timeout=120)
+
+
+def wayback_discover(command: str, target: str) -> str:
+    """Wayback Machine domain discovery."""
+    if not command or command == "wayback-discover":
+        command = f"wayback-discover -d {target}"
+    return run_command(command, timeout=120)
+
+
+def linkedin_scraper(command: str, target: str) -> str:
+    """Professional network OSINT."""
+    if not command or command == "linkedin-scraper":
+        command = f"linkedin-scraper --company {target}"
+    return run_command(command, timeout=120)
+
+
+def github_dorking(command: str, target: str) -> str:
+    """GitHub code/secret searching."""
+    if not command or command == "github-dorking":
+        command = f"github-dorking -o {target} -t /tmp/gh_dork_results.txt"
+    return run_command(command, timeout=120)
+
+
+# ============================================================================
+# Infrastructure & Miscellaneous Security Tools
+# ============================================================================
+
+def ansible_lint(command: str, target: str) -> str:
+    """Infrastructure playbook security."""
+    if not command or command == "ansible-lint":
+        command = f"ansible-lint {target}"
+    return run_command(command, timeout=120)
+
+
+def lynis(command: str, target: str) -> str:
+    """Unix system security auditing."""
+    if not command or command == "lynis":
+        command = f"lynis audit system --quick --no-colors"
+    return run_command(command, timeout=300)
+
+
+def chkrootkit(command: str, target: str) -> str:
+    """Rootkit detection."""
+    if not command or command == "chkrootkit":
+        command = f"chkrootkit -q"
+    return run_command(command, timeout=120)
+
+
+def rkhunter(command: str, target: str) -> str:
+    """Rootkit and backdoor detection."""
+    if not command or command == "rkhunter":
+        command = f"rkhunter --check --skip-keypress --report-warnings-only"
+    return run_command(command, timeout=300)
+
+
+def clamav_scan(command: str, target: str) -> str:
+    """Malware/virus scanning."""
+    if not command or command == "clamscan":
+        command = f"clamscan -r {target} --no-summary"
+    return run_command(command, timeout=600)
+
+
+def yara_scan(command: str, target: str) -> str:
+    """YARA rule-based malware pattern matching."""
+    if not command or command == "yara":
+        command = f"yara -r /tmp/rules.yar {target}"
+    return run_command(command, timeout=120)
+
+
+def osquery(command: str, target: str) -> str:
+    """OS-level analytics and monitoring."""
+    if not command or command == "osqueryi":
+        command = f"osqueryi --json 'SELECT * FROM listening_ports'"
+    return run_command(command, timeout=30)
+
+
+def velociraptor(command: str, target: str) -> str:
+    """Endpoint visibility and collection."""
+    if not command or command == "velociraptor":
+        command = f"velociraptor query 'SELECT * FROM info()'"
+    return run_command(command, timeout=60)
+
+
+def dnsrecon(command: str, target: str) -> str:
+    """DNS enumeration, zone transfer testing, and record brute-forcing."""
+    if not command or command == "dnsrecon":
+        command = f"dnsrecon -d {target} -t std"
+    return run_command(command, timeout=120)
+
+
+def whatportis(command: str, target: str) -> str:
+    """Port and service name lookup database."""
+    if not command or command == "whatportis":
+        command = f"whatportis {target} --like"
+    return run_command(command, timeout=15)
+
+
 def web_search(query: str, target: str = "") -> str:
     """
     Perform a web search using Tavily API (like PentestAgent).
@@ -1100,6 +1761,437 @@ class ToolRegistry:
             "web_search": {
                 "function": web_search,
                 "description": "AI web search (Tavily or DuckDuckGo fallback)",
+                "category": "reconnaissance",
+            },
+            # ── API Security Testing ──────────────────────────────────────
+            "api_rate_limit_tester": {
+                "function": api_rate_limit_tester,
+                "description": "API rate limiting and throttling analysis",
+                "category": "api_security",
+            },
+            "cors_scanner": {
+                "function": cors_scanner,
+                "description": "CORS misconfiguration testing",
+                "category": "api_security",
+            },
+            "graphql_cop": {
+                "function": graphql_cop,
+                "description": "GraphQL security auditing tool",
+                "category": "api_security",
+            },
+            "graphql_introspection": {
+                "function": graphql_introspection,
+                "description": "GraphQL schema introspection and analysis",
+                "category": "api_security",
+            },
+            "grpc_scanner": {
+                "function": grpc_scanner,
+                "description": "gRPC service enumeration and testing",
+                "category": "api_security",
+            },
+            "oauth_tester": {
+                "function": oauth_tester,
+                "description": "OAuth 2.0 flow and token security testing",
+                "category": "api_security",
+            },
+            "postman_collection_runner": {
+                "function": postman_collection_runner,
+                "description": "API endpoint testing from Postman collections",
+                "category": "api_security",
+            },
+            "rest_api_fuzzer": {
+                "function": rest_api_fuzzer,
+                "description": "REST API parameter and endpoint fuzzing",
+                "category": "api_security",
+            },
+            "soap_scanner": {
+                "function": soap_scanner,
+                "description": "SOAP/XML web service security testing",
+                "category": "api_security",
+            },
+            "swagger_scanner": {
+                "function": swagger_scanner,
+                "description": "OpenAPI/Swagger specification vulnerability scanning",
+                "category": "api_security",
+            },
+            # ── Wireless Security ─────────────────────────────────────────
+            "aircrack_ng": {
+                "function": aircrack_ng,
+                "description": "WiFi network analysis and security testing",
+                "category": "wireless",
+            },
+            "bettercap": {
+                "function": bettercap,
+                "description": "Network attack and monitoring framework",
+                "category": "wireless",
+            },
+            "hostapd_wpe": {
+                "function": hostapd_wpe,
+                "description": "Rogue access point for credential capture",
+                "category": "wireless",
+            },
+            "kismet": {
+                "function": kismet,
+                "description": "Wireless network detector and sniffer",
+                "category": "wireless",
+            },
+            "mdk4": {
+                "function": mdk4,
+                "description": "WiFi denial-of-service testing tool",
+                "category": "wireless",
+            },
+            "reaver": {
+                "function": reaver,
+                "description": "WPS PIN brute-force attack tool",
+                "category": "wireless",
+            },
+            "wash_scan": {
+                "function": wash_scan,
+                "description": "WPS-enabled network scanner",
+                "category": "wireless",
+            },
+            "wifite": {
+                "function": wifite,
+                "description": "Automated wireless attack tool",
+                "category": "wireless",
+            },
+            # ── Mobile Security ────────────────────────────────────────────
+            "apktool": {
+                "function": apktool,
+                "description": "Android APK reverse engineering",
+                "category": "mobile",
+            },
+            "drozer": {
+                "function": drozer,
+                "description": "Android security assessment framework",
+                "category": "mobile",
+            },
+            "frida": {
+                "function": frida,
+                "description": "Dynamic instrumentation toolkit",
+                "category": "mobile",
+            },
+            "ios_deploy": {
+                "function": ios_deploy,
+                "description": "iOS application deployment and testing",
+                "category": "mobile",
+            },
+            "jadx": {
+                "function": jadx,
+                "description": "Android DEX to Java decompiler",
+                "category": "mobile",
+            },
+            "mobsf": {
+                "function": mobsf,
+                "description": "Mobile Security Framework automated analysis",
+                "category": "mobile",
+            },
+            "needle": {
+                "function": needle,
+                "description": "iOS security testing framework",
+                "category": "mobile",
+            },
+            "objection": {
+                "function": objection,
+                "description": "Runtime mobile exploration",
+                "category": "mobile",
+            },
+            # ── Additional Network Tools ───────────────────────────────────
+            "bettercap_net": {
+                "function": bettercap_net,
+                "description": "Network monitoring and MITM",
+                "category": "reconnaissance",
+            },
+            "mitm6": {
+                "function": mitm6,
+                "description": "IPv6 DNS takeover via mitm",
+                "category": "exploitation",
+            },
+            "netcat_scan": {
+                "function": netcat_scan,
+                "description": "Netcat port scanning and banner grabbing",
+                "category": "reconnaissance",
+            },
+            "onesixtyone": {
+                "function": onesixtyone,
+                "description": "Fast SNMP community string scanner",
+                "category": "reconnaissance",
+            },
+            "responder": {
+                "function": responder,
+                "description": "LLMNR/NBT-NS/MDNS poisoner",
+                "category": "exploitation",
+            },
+            "snmpwalk": {
+                "function": snmpwalk,
+                "description": "SNMP enumeration and information gathering",
+                "category": "enumeration",
+            },
+            "tcpdump": {
+                "function": tcpdump,
+                "description": "Network packet capture and analysis",
+                "category": "reconnaissance",
+            },
+            "wireshark_cli": {
+                "function": wireshark_cli,
+                "description": "TShark packet analysis",
+                "category": "reconnaissance",
+            },
+            # ── Additional Web Application Tools ──────────────────────────
+            "clickjacking_tester": {
+                "function": clickjacking_tester,
+                "description": "Clickjacking vulnerability testing",
+                "category": "vulnerability",
+            },
+            "crlf_scanner": {
+                "function": crlf_scanner,
+                "description": "CRLF injection detection",
+                "category": "vulnerability",
+            },
+            "host_header_injection": {
+                "function": host_header_injection,
+                "description": "Host header injection testing",
+                "category": "vulnerability",
+            },
+            "lfi_scanner": {
+                "function": lfi_scanner,
+                "description": "Local File Inclusion testing",
+                "category": "vulnerability",
+            },
+            "nosql_injection": {
+                "function": nosql_injection,
+                "description": "NoSQL injection detection",
+                "category": "vulnerability",
+            },
+            "open_redirect_scanner": {
+                "function": open_redirect_scanner,
+                "description": "Open redirect vulnerability testing",
+                "category": "vulnerability",
+            },
+            "ssrf_scanner": {
+                "function": ssrf_scanner,
+                "description": "SSRF vulnerability detection",
+                "category": "vulnerability",
+            },
+            "subdomain_takeover": {
+                "function": subdomain_takeover,
+                "description": "Subdomain takeover detection",
+                "category": "vulnerability",
+            },
+            "xsstrike": {
+                "function": xsstrike,
+                "description": "Advanced XSS detection suite",
+                "category": "vulnerability",
+            },
+            "xxe_scanner": {
+                "function": xxe_scanner,
+                "description": "XML External Entity injection testing",
+                "category": "vulnerability",
+            },
+            # ── Exploitation Tools ────────────────────────────────────────
+            "bloodhound": {
+                "function": bloodhound,
+                "description": "Active Directory attack path analysis",
+                "category": "exploitation",
+            },
+            "crackmapexec": {
+                "function": crackmapexec,
+                "description": "Network service exploitation (legacy)",
+                "category": "exploitation",
+            },
+            "impacket_tools": {
+                "function": impacket_tools,
+                "description": "Network protocol exploitation suite",
+                "category": "exploitation",
+            },
+            "metasploit": {
+                "function": metasploit,
+                "description": "Metasploit framework console",
+                "category": "exploitation",
+            },
+            "mimikatz": {
+                "function": mimikatz,
+                "description": "Windows credential extraction (for reference)",
+                "category": "exploitation",
+            },
+            "msfvenom": {
+                "function": msfvenom,
+                "description": "Payload generation with Metasploit",
+                "category": "exploitation",
+            },
+            "responder_exploit": {
+                "function": responder_exploit,
+                "description": "LLMNR/NBT-NS poisoning attacks",
+                "category": "exploitation",
+            },
+            "searchsploit": {
+                "function": searchsploit,
+                "description": "Exploit-DB offline search",
+                "category": "exploitation",
+            },
+            # ── CTF Tools ─────────────────────────────────────────────────
+            "cyberchef": {
+                "function": cyberchef,
+                "description": "Data encoding/decoding Swiss Army knife",
+                "category": "ctf",
+            },
+            "john_wordlist": {
+                "function": john_wordlist,
+                "description": "Custom wordlist generation with John",
+                "category": "ctf",
+            },
+            "one_gadget": {
+                "function": one_gadget,
+                "description": "Find one-shot gadgets in libc",
+                "category": "ctf",
+            },
+            "pwntools": {
+                "function": pwntools,
+                "description": "CTF exploitation framework",
+                "category": "ctf",
+            },
+            "ropgadget": {
+                "function": ropgadget,
+                "description": "ROP gadget finder for binary exploitation",
+                "category": "ctf",
+            },
+            "stegsolve": {
+                "function": stegsolve,
+                "description": "Steganography analysis tool",
+                "category": "ctf",
+            },
+            "z3_solver": {
+                "function": z3_solver,
+                "description": "Z3 SMT solver for crypto/reversing challenges",
+                "category": "ctf",
+            },
+            "zsteg": {
+                "function": zsteg,
+                "description": "PNG/BMP steganography detection",
+                "category": "ctf",
+            },
+            # ── Additional Cloud & Container Security ─────────────────────
+            "checkov": {
+                "function": checkov,
+                "description": "IaC static analysis for security",
+                "category": "cloud",
+            },
+            "cloudsploit": {
+                "function": cloudsploit,
+                "description": "Cloud security configuration scanner",
+                "category": "cloud",
+            },
+            "falco": {
+                "function": falco,
+                "description": "Container runtime security monitoring",
+                "category": "cloud",
+            },
+            "pacu": {
+                "function": pacu,
+                "description": "AWS exploitation framework",
+                "category": "cloud",
+            },
+            "scout_suite": {
+                "function": scout_suite,
+                "description": "Multi-cloud security auditing",
+                "category": "cloud",
+            },
+            "terraform_compliance": {
+                "function": terraform_compliance,
+                "description": "Terraform security compliance checking",
+                "category": "cloud",
+            },
+            # ── Additional OSINT Tools ────────────────────────────────────
+            "censys_search": {
+                "function": censys_search,
+                "description": "Censys internet device search",
+                "category": "osint",
+            },
+            "dnsdumpster": {
+                "function": dnsdumpster,
+                "description": "DNS reconnaissance",
+                "category": "osint",
+            },
+            "github_dorking": {
+                "function": github_dorking,
+                "description": "GitHub code/secret searching",
+                "category": "osint",
+            },
+            "haveibeenpwned": {
+                "function": haveibeenpwned,
+                "description": "Breach database checker",
+                "category": "osint",
+            },
+            "hunter_io": {
+                "function": hunter_io,
+                "description": "Email address finder",
+                "category": "osint",
+            },
+            "linkedin_scraper": {
+                "function": linkedin_scraper,
+                "description": "Professional network OSINT",
+                "category": "osint",
+            },
+            "maltego": {
+                "function": maltego,
+                "description": "OSINT and link analysis",
+                "category": "osint",
+            },
+            "wayback_discover": {
+                "function": wayback_discover,
+                "description": "Wayback Machine domain discovery",
+                "category": "osint",
+            },
+            # ── Infrastructure & Miscellaneous ────────────────────────────
+            "ansible_lint": {
+                "function": ansible_lint,
+                "description": "Infrastructure playbook security",
+                "category": "infrastructure",
+            },
+            "chkrootkit": {
+                "function": chkrootkit,
+                "description": "Rootkit detection",
+                "category": "infrastructure",
+            },
+            "clamav_scan": {
+                "function": clamav_scan,
+                "description": "Malware/virus scanning",
+                "category": "infrastructure",
+            },
+            "lynis": {
+                "function": lynis,
+                "description": "Unix system security auditing",
+                "category": "infrastructure",
+            },
+            "osquery": {
+                "function": osquery,
+                "description": "OS-level analytics and monitoring",
+                "category": "infrastructure",
+            },
+            "rkhunter": {
+                "function": rkhunter,
+                "description": "Rootkit and backdoor detection",
+                "category": "infrastructure",
+            },
+            "velociraptor": {
+                "function": velociraptor,
+                "description": "Endpoint visibility and collection",
+                "category": "infrastructure",
+            },
+            "yara_scan": {
+                "function": yara_scan,
+                "description": "YARA rule-based malware pattern matching",
+                "category": "infrastructure",
+            },
+            # ── Additional Reconnaissance ─────────────────────────────────
+            "dnsrecon": {
+                "function": dnsrecon,
+                "description": "DNS enumeration, zone transfer testing, and record brute-forcing",
+                "category": "reconnaissance",
+            },
+            "whatportis": {
+                "function": whatportis,
+                "description": "Port and service name lookup database",
                 "category": "reconnaissance",
             },
         }
