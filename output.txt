@@ -1,0 +1,2 @@
+Archive:  extracted.zip
+   skipping: flag.txt                unsupported compression method 99
