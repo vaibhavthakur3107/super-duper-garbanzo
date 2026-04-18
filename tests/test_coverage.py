@@ -1049,6 +1049,7 @@ class TestProcessManagerExtended:
             if proc_info and proc_info.status.value != "running":
                 break
             time.sleep(0.05)
+        assert time.time() < deadline, "Process did not complete within timeout"
         output = pm.get_output(info.pid)
         assert "hello_world" in output
 
@@ -1064,6 +1065,7 @@ class TestProcessManagerExtended:
             if pi and pi.status.value != "running":
                 break
             time.sleep(0.05)
+        assert time.time() < deadline, "Process did not complete within timeout"
         cleaned = pm.cleanup_finished()
         assert cleaned >= 1
 
@@ -1075,6 +1077,7 @@ class TestProcessManagerExtended:
             if pi and pi.status.value != "running":
                 break
             time.sleep(0.05)
+        assert time.time() < deadline, "Process did not complete within timeout"
         pm.cleanup_finished()
         # Process no longer in active list
         assert pm.get_process(info.pid) is None
